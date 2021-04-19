@@ -2,13 +2,13 @@ const { client } = require("./client");
 
 
 
-const addActivityToRoutine = async ({routineId, activityId, count, duration}) => {
+const createCategory = async ({name, priority}) => {
 
     try {
 
-        const { rows } = await client.query(`INSERT INTO "routineActivities"("routineId", "activityId", count, duration)
+        const { rows } = await client.query(`INSERT INTO "routineActivities"(name, priority)
                 VALUES ($1, $2, $3, $4)
-                RETURNING *;`, [routineId, activityId, count, duration]);
+                RETURNING *;`, [name, priority]);
 
         return rows[0];
     }

@@ -57,7 +57,6 @@ async function createTables() {
     "itemNumber" VARCHAR(16) UNIQUE NOT NULL,
     name VARCHAR(255) UNIQUE NOT NULL,
     description VARCHAR(255),
-    categories VARCHAR(255),
     cost FLOAT(12),
     price FLOAT(12),
     "onHand" INT,
@@ -81,7 +80,9 @@ async function createTables() {
     quantity INT
   );
   CREATE TABLE categories (
-    id SERIAL PRIMARY KEY
+    id SERIAL PRIMARY KEY,
+    name CHARVAR(255),
+    
   );
   CREATE TABLE "itemCategories" (
     id SERIAL PRIMARY KEY,
@@ -89,6 +90,8 @@ async function createTables() {
     "categoryId" REFERENCES categories
   );`);
 
+
+  
   }
   catch (error) {
     console.error('error creating tables...');

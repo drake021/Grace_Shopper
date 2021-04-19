@@ -2,31 +2,37 @@
 const { client } = require("./client");
 const bcrypt = require('bcrypt');
 
-const createUser = async ({username, password}) => {
+const createUser = async ({username, password, email, firstName, lastName, phoneNumber, address, address2, zip, state}) => {
 
     try {
         const SALT_COUNT = 10;
 
-        // const result = await bcrypt.hash(object.password, SALT_COUNT, async function (err, hashedPassword) {
-
-        const { rows } = await client.query(`INSERT INTO users(username, password)
-                VALUES ($1, $2)
-                ON CONFLICT (username) DO NOTHING 
-                RETURNING *;`, [username, password]);
+        const { rows } = await client.query(`INSERT INTO users(username, password, email, "firstName", "lastName", "phoneNumber", address, address2, zip, state)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                ON CONFLICT (username, email) DO NOTHING 
+                RETURNING *;`, [username, password, email, firstName, lastName, phoneNumber, address, address2, zip, state]);
         delete rows[0].password;
         return rows[0];
-        // });
-        // console.log('create user result:', result);
-        // return result;
     }
 
     catch (error) {
         console.error('error creating user..', error);
         throw error;
     }
+};
+//this function updates a user row by id
+const updateUser = ({id, password, admin, firstName, lastName, email, phoneNumber, address, address2, zip, state}) => {
+
+    // returns user object of updated row (not password)
+};
+//this function deletes a user
+const deleteUser = ({id}) => {
+
+    //returns nothing or success message
 }
 
-const getUser = async ({ username, password }) => {
+//for logging in
+const loginUser = async ({ username, password }) => {
     console.log('running getUser..');
     try {
 
@@ -34,7 +40,6 @@ const getUser = async ({ username, password }) => {
             SELECT * FROM users
             WHERE username=$1;`, [username]);
         console.log('looking at user: ', rows[0]);
-        //this if block not passing correctly for some reason..
         if (rows[0].password == password) {
             delete rows[0].password;
             return rows[0];
@@ -48,30 +53,8 @@ const getUser = async ({ username, password }) => {
         console.error('error getting User w/ password check..', error);
         throw error;
     }
-}
-// getUser({ username, password })
-// this should be able to verify the password against the hashed password
-
-
-const getUserById = async (id) => {
-    console.log('running getUserById..');
-    try {
-
-        const { rows } = await client.query(`
-            SELECT username, id FROM users
-            WHERE id=$1;`, [id]);
-
-        return rows[0];
-    }
-
-    catch (error) {
-        console.error('error getting user by Id..', error);
-        throw error;
-    }
-}
-// select a user using the user's ID. Return the user object.
-// do NOT return the password
-
+};
+//this function lets you read the data of a user (hide password)
 const getUserByUsername = async (username) => {
     console.log('running getUserByUsername..');
     try {
@@ -87,13 +70,12 @@ const getUserByUsername = async (username) => {
         console.error('error getting user by Username..', error);
         throw error;
     }
-}
-// getUserByUsername(username)
-// select a user using the user's username. Return the user object.
+};
+
+
 
 module.exports = {
     createUser,
-    getUser,
-    getUserById,
+    loginUser,
     getUserByUsername
 }
