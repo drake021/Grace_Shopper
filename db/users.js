@@ -9,10 +9,11 @@ const createUser = async ({username, password, email, firstName, lastName, phone
 
         const { rows } = await client.query(`INSERT INTO users(username, password, email, "firstName", "lastName", "phoneNumber", address, address2, zip, state)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-                ON CONFLICT (username, email) DO NOTHING 
+                ON CONFLICT (username) DO NOTHING 
                 RETURNING *;`, [username, password, email, firstName, lastName, phoneNumber, address, address2, zip, state]);
         delete rows[0].password;
         return rows[0];
+        //Would also like to do nothing on conflict with email; but haven't figured out how to work it.
     }
 
     catch (error) {
@@ -40,11 +41,15 @@ const loginUser = async ({ username, password }) => {
             SELECT * FROM users
             WHERE username=$1;`, [username]);
         console.log('looking at user: ', rows[0]);
+        if(!rows[0]) {
+            console.log('USER DOES NOT EXIST')
+            throw {name: 'USER_NULL', message: 'User does not exist'};
+        }
         if (rows[0].password == password) {
             delete rows[0].password;
             return rows[0];
         } else {
-            throw `passwords do not match...`;
+            throw {name: 'PASSWORD_FAIL', message: 'Password is incorrect'};
         }
 
     }
