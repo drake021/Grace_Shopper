@@ -10,3 +10,4 @@ export { default as Catalog } from './Catalog.js';
 export { default as Footer } from './Footer.js';
 export { default as Home } from './Home.js';
 export { default as User } from './User.js';
+export { default as Auth } from './Auth.js';

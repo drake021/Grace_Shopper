@@ -1,9 +1,18 @@
 import React, {useState, useHook} from 'react';
+import Auth from './Auth.js';
 
 const AppHeader = () => {
 
     return <>
-        <h1>AppHeader</h1>
+        <div id='AppHeader'>
+            <div>
+                Hamburger icon
+            </div>
+            <div>
+                LOGO
+            </div>
+            <Auth />
+        </div>
     </>
 };
 

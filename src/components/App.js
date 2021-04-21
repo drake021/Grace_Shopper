@@ -34,6 +34,9 @@ const App = () => {
       <Route path='/catalog/category/:categoryId'>
         <Catalog />
       </Route>
+      <Route path='/catalog'>
+        <Redirect to="/catalog/category/featured" />
+      </Route>
       <Route path='/user'>
         <User />
       </Route>
