@@ -9,34 +9,25 @@
     "client:build": "react-scripts build",
     "server:dev": "nodemon index.js",
     "db:build": "node ./db/init_db",
-<<<<<<< HEAD
-    "start": "node index.js"
-=======
     "start": "node index.js",
     "seed:dev": "nodemon ./db/seed.js",
     "seed": "node ./db/seed.js"
->>>>>>> af87f2a15cd44b2cc80d0da51e13cadfb8a3d8cf
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-<<<<<<< HEAD
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
-    "axios": "^0.21.1",
-    "express": "^4.17.1",
-    "fontsource-roboto": "^4.0.0",
-=======
     "axios": "^0.21.1",
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "fontsource-roboto": "^4.0.0",
     "jsonwebtoken": "^8.5.1",
->>>>>>> af87f2a15cd44b2cc80d0da51e13cadfb8a3d8cf
     "morgan": "^1.10.0",
-    "pg": "^8.2.1",
+    "pg": "^8.6.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
