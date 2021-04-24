@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # The Smallest Starting Point
 
 So, you want to build a full-stack JavaScript application with:
@@ -102,6 +101,3 @@ heroku run npm run db:build
 Which will run `npm run db:build` on the heroku server.
 
 Once that command runs, you can type `heroku open` to get a browser to open up locally with your full-stack application running remotely.
-=======
-# Grace_Shopper
->>>>>>> 208730e15636f02afbc1c467ed61931863027fc1
