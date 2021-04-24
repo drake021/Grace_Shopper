@@ -118,9 +118,9 @@ const getUserByUsername = async (username) => {
         const { rows } = await client.query(`
             SELECT * FROM users
             WHERE username=$1;`, [username]);
-        if (!rows[0]) {
-            throw { name: "userNotExist", message: "Username does not exist" }
-        }
+        // if (!rows[0]) {
+        //     throw { name: "userNotExist", message: "Username does not exist" }
+        // }
 
         return rows[0];
     }
