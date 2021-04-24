@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useEffect, useState } from 'react';
 
 const Catalog = () => {
@@ -55,5 +56,15 @@ const Catalog = () => {
     );
 
 }
+=======
+import React, {useState, useHook} from 'react';
+
+const Catalog = () => {
+
+    return <>
+        <h1>Catalog</h1>
+    </>
+};
+>>>>>>> af87f2a15cd44b2cc80d0da51e13cadfb8a3d8cf
 
 export default Catalog;

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -151,3 +152,15 @@ export default function Checkout() {
     </React.Fragment>
   );
 }
+=======
+import React, {useState, useHook} from 'react';
+
+const Checkout = () => {
+
+    return <>
+        <h1>Checkout</h1>
+    </>
+};
+
+export default Checkout;
+>>>>>>> af87f2a15cd44b2cc80d0da51e13cadfb8a3d8cf

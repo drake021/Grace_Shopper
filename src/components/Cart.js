@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 let shoppingCart = (function() {
     cart = [];
 
@@ -169,3 +170,15 @@ let shoppingCart = (function() {
     });
     
     displayCart();
+=======
+import React, {useState, useHook} from 'react';
+
+const Cart = () => {
+
+    return <>
+        <h1>Cart</h1>
+    </>
+};
+
+export default Cart;
+>>>>>>> af87f2a15cd44b2cc80d0da51e13cadfb8a3d8cf
