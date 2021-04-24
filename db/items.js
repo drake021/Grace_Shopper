@@ -9,7 +9,9 @@ const createItem = async ({ itemNumber, description, name, cost, price }) => {
                 VALUES ($1, $2, $3, $4, $5)
                 ON CONFLICT ("itemNumber") DO NOTHING 
                 RETURNING *;`, [itemNumber, description, name, cost, price]);
-
+        if (!rows[0]) {
+            throw {name: "itemNumberDuplicate", message: "item number already exist!"}
+        }
         return rows[0];
     }
 
@@ -24,6 +26,9 @@ const createItem = async ({ itemNumber, description, name, cost, price }) => {
 const getItemById = (id) => {
 
     // returns an item object
+};
+const getItemByItemNumber = (itemNumber) => {
+
 };
 
 //updates an item row by id
@@ -54,5 +59,9 @@ const deleteItem = (id) {
 
 
 module.exports = {
-    createItem
+    createItem,
+    getItemById,
+    getItemByItemNumber,
+    updateItem,
+    deleteItem
 }

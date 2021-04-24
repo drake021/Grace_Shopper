@@ -2,7 +2,7 @@
 const { client } = require("./client");
 const bcrypt = require('bcrypt');
 
-const createUser = async ({username, password, email, firstName, lastName, phoneNumber, address, address2, zip, state}) => {
+const createUser = async ({ username, password, email, firstName, lastName, phoneNumber, address, address2, zip, state }) => {
 
     try {
         const SALT_COUNT = 10;
@@ -14,6 +14,7 @@ const createUser = async ({username, password, email, firstName, lastName, phone
         delete rows[0].password;
         return rows[0];
         //Would also like to do nothing on conflict with email; but haven't figured out how to work it.
+        // could just write code to compare new entry to db
     }
 
     catch (error) {
@@ -22,15 +23,65 @@ const createUser = async ({username, password, email, firstName, lastName, phone
     }
 };
 //this function updates a user row by id
-const updateUser = ({id, password, admin, firstName, lastName, email, phoneNumber, address, address2, zip, state}) => {
+const updateUser = async ({ id, admin, firstName, lastName, email, phoneNumber, address, address2, zip, state }) => {
+    let dynamicArray = [];
+    let dynamicArrayNames = [];
+    const verifyValue = (value, type = 'string', name) => {
+        if (typeof (value) === type) {
+            dynamicArray.push(value);
+            dynamicArrayNames.push(name);
+        }
+    };
+    const getQueryValuesString = () => {
+        let queryValuesString = `SET `;
+        verifyValue(admin, 'boolean', 'admin');
+        verifyValue(firstName, _, '"firstName"');
+        verifyValue(lastName, _, '"lastName"');
+        verifyValue(firstName, _, '"firstName"');
+        verifyValue(email, _, 'email');
+        verifyValue(phoneNumber, _, 'phoneNumber');
+        verifyValue(address, _, 'address');
+        verifyValue(address2, _, 'address2');
+        verifyValue(zip, _, 'zip');
+        verifyValue(state, _, 'state');
+        if (dynamicArray.length < 1) {
+            throw { name: 'error_noInputValues', message: 'missing input values for database' }
+        }
+        queryValuesString = queryValuesString + `${dynamicArrayNames[0]}=$1`;
 
-    // returns user object of updated row (not password)
+        if (dynamicArray.length > 1) {
+            for (let i = 1; dynamicArray.length > i; i++) {
+                queryValuesString = queryValuesString + `, ${dynamicArrayNames[i]}=$${i + 1}`;
+            }
+        }
+        dynamicArray.push(id);
+
+        return queryValuesString;
+    };
+
+    try {
+        //if there are no values passed in except token and id; this should error out as no values provided
+        const queryValuesString = getQueryValuesString();
+        // console.log('queryString: ', queryValuesString);
+        const { rows } = await client.query(`
+        UPDATE users
+        ${queryValuesString}
+        WHERE id=$${dynamicArray.length}
+        RETURNING *;`, dynamicArray);
+        if (!rows[0]) {
+            throw { name: 'error_updateFail', message: 'failed to update user row' }
+        }
+        return rows[0];
+        // returns user object of updated row (not password);
+    }
+    catch (error) {
+        console.error('updateUser failed...', error);
+        throw error;
+    }
 };
-//this function deletes a user
-const deleteUser = ({id}) => {
 
-    //returns nothing or success message
-}
+
+
 
 //for logging in
 const loginUser = async ({ username, password }) => {
@@ -41,15 +92,15 @@ const loginUser = async ({ username, password }) => {
             SELECT * FROM users
             WHERE username=$1;`, [username]);
         console.log('looking at user: ', rows[0]);
-        if(!rows[0]) {
+        if (!rows[0]) {
             console.log('USER DOES NOT EXIST')
-            throw {name: 'USER_NULL', message: 'User does not exist'};
+            throw { name: 'USER_NULL', message: 'User does not exist' };
         }
         if (rows[0].password == password) {
             delete rows[0].password;
             return rows[0];
         } else {
-            throw {name: 'PASSWORD_FAIL', message: 'Password is incorrect'};
+            throw { name: 'PASSWORD_FAIL', message: 'Password is incorrect' };
         }
 
     }
@@ -67,6 +118,9 @@ const getUserByUsername = async (username) => {
         const { rows } = await client.query(`
             SELECT * FROM users
             WHERE username=$1;`, [username]);
+        if (!rows[0]) {
+            throw { name: "userNotExist", message: "Username does not exist" }
+        }
 
         return rows[0];
     }
@@ -77,10 +131,32 @@ const getUserByUsername = async (username) => {
     }
 };
 
+const getUserById = async () => {
+    console.log('running getUserById..');
+    try {
+
+        const { rows } = await client.query(`
+            SELECT * FROM users
+            WHERE username=$1;`, [username]);
+        if (!rows[0]) {
+            throw { message: "user id does not exist", name: "idNotExist" }
+        }
+
+        return rows[0];
+    }
+
+    catch (error) {
+        console.error('error getting user by Username..', error);
+        throw error;
+    }
+}
+
 
 
 module.exports = {
     createUser,
     loginUser,
-    getUserByUsername
+    getUserByUsername,
+    getUserById,
+    updateUser
 }

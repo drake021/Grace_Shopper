@@ -10,7 +10,8 @@ Cart,
 Checkout,
 ViewOrder,
 Orders,
-Footer
+Footer,
+ApiDocuments
 } from './'
 import {
   getSomething
@@ -25,6 +26,9 @@ const App = () => {
     <AppHeader />
     <Nav />
     <Switch>
+    <Route path='/api/documents'>
+        <ApiDocuments />
+      </Route>
       <Route path='/home'>
         <Home />
       </Route>
