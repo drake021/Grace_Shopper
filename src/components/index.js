@@ -1,1 +1,10 @@
 export { default as Catalog} from './catalog';
+export {default as App} from './App';
+export {default as Header} from './Header';
+export {default as Home} from './Home';
+export {default as Login} from './Login';
+export {default as Logout} from './Logout';
+export {default as Register} from './Register';
+export {default as Cart} from './Cart';
+export {default as Profile} from './Profile';
+export {default as OrderHistory} from './OrderHistory';
