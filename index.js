@@ -5,10 +5,10 @@ const { JWT_SECRET } = process.env;
 
 const { createUser, loginUser, client, getUserByUsername, updateUser,
     createOrder, createLineItem, deleteOrder, getItemCategoriesByItem,
-    getCategoriesById, getAllItems, getItemById, updateItem,
-    removeItem, attachLineItem, getLineItemsByOrder, removeLineItem,
-    createCategory, getAllCategories, removeCategory, getItemCategoriesByCategory,
-    removeItemCategory, createItemCategory } = require('./db');
+    getCategoryById, createItem, getAllItems, getItemById, updateItem,
+    removeItem, getLineItemsByOrder, removeLineItem,
+    createCategory, getAllCategories, removeCategory, updateCategory, getItemCategoriesByCategory,
+    removeItemCategory, createItemCategory, getItemByItemNumber } = require('./db');
 
 // create the express server here
 
@@ -433,7 +433,7 @@ itemsRouter.get('', verifyToken, async (req, res, next) => {
                 delete item.cost;
                 const itemCategories = await getItemCategoriesByItem(item.id);
                 const categories = itemCategories.map(async itemCategory => {
-                    return await getCategoriesById(itemCategory.categoryId);
+                    return await getCategoryById(itemCategory.categoryId);
                 });
                 item.categories = categories;
                 return item;
@@ -441,7 +441,7 @@ itemsRouter.get('', verifyToken, async (req, res, next) => {
             return async (item) => {
                 const itemCategories = await getItemCategoriesByItem(item.id);
                 const categories = itemCategories.map(async itemCategory => {
-                    return await getCategoriesById(itemCategory.categoryId);
+                    return await getCategoryById(itemCategory.categoryId);
                 });
                 item.categories = categories;
                 return item;
@@ -566,7 +566,7 @@ lineItemsRouter.post('', verifyToken, async (req, res, next) => {
 
     try {
 
-        const lineItem = await attachLineItem({ orderId, itemId, quantity, cost, price, name, description });
+        const lineItem = await createLineItem({ orderId, itemId, quantity, cost, price, name, description });
 
         res.send(lineItem);
         next();

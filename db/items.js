@@ -30,7 +30,9 @@ const getItemById = (id) => {
 const getItemByItemNumber = (itemNumber) => {
 
 };
+const getAllItems = () => {
 
+};
 //updates an item row by id
 const updateItem = ({id, itemNumber, name, description, cost, price, onHand, allocated}) => {
 
@@ -38,7 +40,7 @@ const updateItem = ({id, itemNumber, name, description, cost, price, onHand, all
 };
 
 //deletes item row from DB
-const deleteItem = (id) {
+const removeItem = (id) => {
 
     // returns null or success message
 };
@@ -60,8 +62,9 @@ const deleteItem = (id) {
 
 module.exports = {
     createItem,
+    getAllItems,
     getItemById,
     getItemByItemNumber,
     updateItem,
-    deleteItem
+    removeItem
 }

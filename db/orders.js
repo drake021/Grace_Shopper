@@ -111,7 +111,7 @@ const updateOrder = ({ id, attn, email, phoneNumber, address, address2, zip, sta
     }
     //returns order object
 };
-
+//gets all orders by userId; includes lineItems
 const getOrdersByUserId = (id) => {
     console.log('running getOrdersByUserId..');
     try {
@@ -131,7 +131,7 @@ const getOrdersByUserId = (id) => {
     }
 }
 
-//deletes the order row in DB by id
+//deletes the order row in DB by id; will delete lineItems associated with the order first
 const deleteOrder = (id) => {
     console.log('running deleteOrder..');
     try {
