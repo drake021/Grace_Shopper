@@ -78,7 +78,12 @@ async function createTables() {
     id SERIAL PRIMARY KEY,
     "orderId" INT REFERENCES orders(id),
     "itemId" INT REFERENCES items(id),
-    quantity INT
+    ln INT,
+    quantity INT,
+    cost FLOAT(12),
+    price FLOAT(12),
+    name VARCHAR(255),
+    description VARCHAR(255)
   );`);
   console.log('creating categories..');
   await client.query(`CREATE TABLE categories (

@@ -10,7 +10,10 @@ const { JWT_SECRET } = process.env;
 //     addActivityToRoutine, destroyRoutineActivity, getRoutineById,
 //     getRoutineActivityById } = require('./db');
 
-const { createUser, loginUser, client, getUserByUsername, updateUser } = require('./db');
+const { createUser, loginUser, client, getUserByUsername, updateUser,
+    createOrder, createLineItem, deleteOrder, getItemCategoriesByItem,
+    getCategoriesById, getAllItems, getItemById, updateItem,
+    removeItem } = require('./db');
 
 // create the express server here
 
@@ -20,6 +23,7 @@ const server = express();
 const cors = require('cors');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const orders = require('./db/orders');
 
 
 server.use(cors());
@@ -28,9 +32,19 @@ server.use(bodyParser.json());
 
 const apiRouter = express.Router();
 const usersRouter = express.Router();
+const ordersRouter = express.Router();
+const itemsRouter = express.Router();
+const lineItemsRouter = express.Router();
+const categoriesRouter = express.Router();
+const itemCategoriesRouter = express.Router();
 
 server.use('/api', apiRouter);
 apiRouter.use('/users', usersRouter);
+apiRouter.use('/orders', ordersRouter);
+apiRouter.use('/items', itemsRouter);
+apiRouter.use('/lineItems', lineItemsRouter);
+apiRouter.use('/categories', categoriesRouter);
+apiRouter.use('/itemCategories', itemCategoriesRouter);
 
 client.connect();
 
@@ -63,11 +77,6 @@ function requirePassword(req, res, next) {
     next();
 };
 
-//////////
-server.listen(PORT, () => {
-    console.log('The server is up on port', PORT);
-});
-
 
 const verifyToken = async (req, res, next) => {
     console.log('running token check function...');
@@ -98,24 +107,51 @@ const verifyToken = async (req, res, next) => {
         });
     }
 };
+const respError = (name, message) => {
+    return {
+        name: `error_${name}`,
+        message,
+        error: message
+    };
+};
 
+// *** templates ***
 
+// usersRouter.get('', requireUsername, requirePassword, verifyToken, async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
+
+///////////////////////////////
+
+server.listen(PORT, () => {
+    console.log('The server is up on port', PORT);
+});
 
 apiRouter.get('/health', (req, res, next) => {
     console.log('The server is up and healthy on port', PORT);
 
     res.send({ message: 'server is up and healthy!!!' });
 });
-
-
-
-
-
-
-
-
-
-
 
 
 // ***users***
@@ -144,6 +180,7 @@ usersRouter.post('/register', async (req, res, next) => {
 
 // Throw errors for duplicate username, or password-too-short.
 
+//POST /api/users/login
 usersRouter.post('/login', requireUsername, requirePassword, async (req, res, next) => {
 
     const { username, password } = req.body;
@@ -163,7 +200,67 @@ usersRouter.post('/login', requireUsername, requirePassword, async (req, res, ne
 
 });
 
-usersRouter.post('/update', verifyToken, async (req, res, next) => {
+// GET /api/users (**Admin)
+//returns all users but without passwords
+
+usersRouter.get('', verifyToken, async (req, res, next) => {
+
+    if (!req.user.admin) {
+        throw {
+            name: 'error_requireAdmin',
+            error: 'must use token of admin user',
+            message: 'must use token of admin user'
+        };
+    };
+
+    try {
+
+        const users = await getAllUsers();
+        if (users.length < 1) {
+            throw {
+                name: 'error_noRows',
+                error: 'no rows were returned from getAllUsers query',
+                message: 'no rows were returned from getAllUsers query'
+            };
+        }
+
+        res.send(users);
+        next();
+    }
+    catch ({ name, message }) {
+        next({ name, message })
+    }
+
+});
+
+// PATCH /api/users/:userId
+//updated user row **admin** or **owner**
+
+usersRouter.patch('/:userId', verifyToken, async (req, res, next) => {
+
+    if (!req.user) {
+        throw {
+            name: 'error_requireToken',
+            error: 'must provide a BEARER token',
+            message: 'must provide a BEARER token'
+        };
+    }
+
+    const id = req.params.userId;
+
+    if (!req.user.admin) {
+        //user is not admin; so if he owner of user?
+        if (req.user.id !== id) {
+            throw {
+                name: 'error_requireAdmin',
+                error: 'must use token of admin user',
+                message: 'must use token of admin user'
+            };
+        };
+    };
+
+    const { admin, firstName, lastName, email, phoneNumber, address, address2, zip, state } = req.body;
+
     try {
 
         const updatedUser = await updateUser({ id, admin, firstName, lastName, email, phoneNumber, address, address2, zip, state });
@@ -176,6 +273,666 @@ usersRouter.post('/update', verifyToken, async (req, res, next) => {
         next({ name, message })
     }
 });
+
+// *** Orders *** */
+
+//POST api/orders (optional token)
+//creates a new Order; if token provided then assign creator id
+//pass in optional "lineItems" array to have line items added to new order.
+ordersRouter.post('', verifyToken, async (req, res, next) => {
+    const { attn, email, phoneNumber, address, address2, zip, state, lineItems } = req.body;
+    if (!!req.user) {
+        const userId = req.user.id;
+    }
+
+    try {
+
+        const newOrder = await createOrder({ userId, attn, email, phoneNumber, address, address2, zip, state });
+
+        // 
+        if (!lineItems || !Array.isArray(lineItems)) {
+            res.send(newOrder);
+            next();
+        } else {
+            // if there are line items...
+            const newLineItems = [];
+            lineItems.forEach(async lineItem => {
+                const newLineItem = await createLineItem(lineItem);
+                newLineItems.push(newLineItem);
+            });
+            newOrder.lineItems = newLineItems;
+            res.send(newOrder);
+            next();
+        }
+
+        res.send({ message: 'create order success!', newOrder });
+        next();
+    }
+    catch ({ name, message }) {
+        next({ name, message })
+    }
+});
+
+//PATCH api/orders/:orderId (admin command?)
+
+ordersRouter.patch('/:orderId', verifyToken, async (req, res, next) => {
+
+    if (!req.user.admin) {
+        throw {
+            name: 'error_requireAdmin',
+            error: 'must use token of admin user',
+            message: 'must use token of admin user'
+        };
+    };
+    const id = Number(req.params.orderId);
+    //should test this
+    if (typeof (id) !== 'number') {
+        throw {
+            name: 'error_OrderId',
+            error: 'orderId not supplied',
+            message: 'orderId not supplied'
+        }
+    };
+
+    const { attn, email, phoneNumber, address, address2, zip, state } = req.body;
+
+    try {
+
+        const updatedOrder = await updateOrder({ id, attn, email, phoneNumber, address, address2, zip, state });
+
+        res.send(updatedOrder);
+        next();
+    }
+    catch ({ name, message }) {
+        next({ name, message })
+    }
+
+});
+
+//DELETE api/orders/:orderId (**admin**)
+
+ordersRouter.delete('/:orderId', verifyToken, async (req, res, next) => {
+
+    if (!req.user.admin) {
+        throw {
+            name: 'error_requireAdmin',
+            error: 'must use token of admin user',
+            message: 'must use token of admin user'
+        };
+    };
+    const id = Number(req.params.orderId);
+    if (typeof (id) !== "number") {
+        throw {
+            name: "error_orderId",
+            message: "orderId input invalid",
+            error: "orderId input invalid"
+        };
+    };
+
+
+    try {
+
+        const data = await deleteOrder(id);
+
+        // Could be a usefil update i guess?
+        // res.send({
+        //     success: true,
+        //     message: `order id ${id} deleted`,
+        //     data
+        // });
+        res.send({ data });
+        next();
+    }
+    catch ({ name, message }) {
+        next({ name, message })
+    }
+
+});
+
+// *** Items ***
+
+//POST api/items (**admin**)
+//creates a new item for the item DB; requires a token from an admin user
+
+itemsRouter.post('', verifyToken, async (req, res, next) => {
+
+    if (!req.user.admin) {
+        throw {
+            name: 'error_requireAdmin',
+            error: 'must use token of admin user',
+            message: 'must use token of admin user'
+        };
+    };
+    const { itemNumber, description, name, cost, price } = req.body;
+    // requires all fields
+    if (typeof (itemNumber) !== 'string') {
+        throw respError('itemNumber', 'itemNumber is missing or invalid');
+    }
+    if (typeof (description) !== 'string' || typeof (name) !== 'string' ||
+        typeof (cost) !== 'number' || typeof (price) !== 'number') {
+        throw respError('missingData', 'body is missing required values');
+    }
+    try {
+
+        const result = await createItem({ itemNumber, description, name, cost, price });
+
+        res.send(result);
+        next();
+    }
+    catch ({ name, message }) {
+        next({ name, message })
+    }
+
+});
+
+//GET api/items (public)
+//returns array of all item objects
+//only returns cost if admin token is used
+
+itemsRouter.get('', verifyToken, async (req, res, next) => {
+    //includes categories
+
+    const attachCategories = (isAdmin = false) => {
+        if (!isAdmin) {
+            return async (item) => {
+                delete item.cost;
+                const itemCategories = await getItemCategoriesByItem(item.id);
+                const categories = itemCategories.map( async itemCategory => {
+                    return await getCategoriesById(itemCategory.categoryId);
+                });
+                item.categories = categories;
+                return item;
+            }
+            return async (item) => {
+                const itemCategories = await getItemCategoriesByItem(item.id);
+                const categories = itemCategories.map( async itemCategory => {
+                    return await getCategoriesById(itemCategory.categoryId);
+                });
+                item.categories = categories;
+                return item;
+            }
+        }
+    };
+
+    try {
+
+        const allItemsWithoutCategories = await getAllItems();
+        //Should work!
+        const allItemsWithCategories = allItemsWithoutCategories.map(attachCategories(req.user.admin));
+        res.send(allItemsWithCategories);
+        next();
+    }
+    catch ({ name, message }) {
+        next({ name, message })
+    }
+
+});
+
+//GET api/items/:itemId (public command)
+//returns item object
+//only return cost if admin token is passed in
+
+itemsRouter.get('/:itemId', verifyToken, async (req, res, next) => {
+
+    const { itemId } = req.params;
+
+    try {
+        const item = await getItemById(itemId);
+        if ( !req.user.admin) {
+            delete item.cost
+        };
+        res.send(item);
+        next();
+    }
+    catch ({ name, message }) {
+        next({ name, message })
+    }
+
+});
+
+// PATCH api/items/:itemId (**admin**)
+//updates an item in the DB
+
+itemsRouter.patch('/:itemId', verifyToken, async (req, res, next) => {
+
+    if ( !req.user.admin) {
+        throw {
+            name: 'error_requireAdmin', 
+            error: 'must use token of admin user', 
+            message: 'must use token of admin user'
+        };
+    };
+    const itemId = Number(req.params.itemId);
+    //edge case: NaN id passed through
+    if (typeof(itemId) !== 'number') {
+        respError('itemId_invalid', 'itemId is missing or invalid');
+    };
+
+    try {
+
+        const updatedItem = await updateItem(itemId);
+        res.send(updatedItem);
+        next();
+    }
+    catch ({ name, message }) {
+        next({ name, message })
+    }
+
+});
+
+//DELETE api/items/:itemId (**admin**)
+//deletes item from DB and all associated line items
+
+itemsRouter.delete('/:itemId', verifyToken, async (req, res, next) => {
+
+    if ( !req.user.admin) {
+        throw {
+            name: 'error_requireAdmin', 
+            error: 'must use token of admin user', 
+            message: 'must use token of admin user'
+        };
+    };
+    const itemId = Number(req.params.itemId);
+    if ( typeof(itemId) !== 'number' ) {
+        throw respError('itemId_invalid', 'itemId is missing or invalid');
+    }
+    try {
+        const data = await removeItem(itemId);
+        res.send(data);
+        next();
+    }
+    catch ({ name, message }) {
+        next({ name, message })
+    }
+
+});
+
+// *** Line Items ***
+
+//POST api/lineItems
+//creates a new lineItem for the lineItems DB;
+
+// lineItemsRouter.post('', verifyToken, async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
+
+//GET api/lineItems/:orderId (public) (*userToken or *admin token) ()
+//returns array of all lineItem objects
+//only returns cost if admin token is used
+
+// lineItemsRouter.get('', verifyToken, async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
+
+// PATCH api/lineItems/:lineItemId (**admin**)
+//updates a lineItem in the DB
+
+// lineItemsRouter.patch('', verifyToken, async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
+
+//DELETE api/lineItems/:lineItemId (**admin**)
+//deletes lineItem from DB
+
+// lineItemsRouter.delete('', verifyToken, async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
+
+// *** Categories ***
+
+//POST api/categories (**admin**)
+//creates a new category for the categories DB; requires a token from an admin user
+
+// categoriesRouter.post('', verifyToken, async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
+
+//GET api/categories (public)
+//returns array of all categories
+
+// categoriesRouter.get('', async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
+
+//GET api/categories/:categoryId (public command) ***Don't think this is needed, save for last ***
+//returns item object
+//only return cost if admin token is passed in
+
+// categoriesRouter.get('', verifyToken, async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
+
+// PATCH api/categories/:itemId (**admin**)
+//updates a category in the DB
+
+// categoriesRouter.patch('', verifyToken, async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
+
+//DELETE api/categories/:categoryId (**admin**)
+//deletes category from DB and all associated itemCategories
+
+// categoriesRouter.delete('/:categoryId', verifyToken, async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
+
+// *** itemCategories ***
+
+//POST api/itemCategories (**admin**)
+//creates a new category for the categories DB; requires a token from an admin user
+
+// itemCategoriesRouter.post('', verifyToken, async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
+
+//GET api/itemCategories/item/:itemId (public)
+//returns array of all itemCategories for item by item id
+
+// itemCategoriesRouter.get('', async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
+
+//GET api/itemCategories/category/:categoryId (public)
+//returns array of all itemCategories for item by category id
+
+// itemCategoriesRouter.get('', async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
+
+
+// PATCH api/itemCategories/:itemId (**admin**) *** As of now don't need this ***
+//updates a itemCategory in the DB
+
+// itemCategoriesRouter.patch('', verifyToken, async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
+
+//DELETE api/itemCategories/:itemCategoryId (**admin**)
+//deletes itemCategory from DB
+
+// itemCategoriesRouter.delete('/:itemCategoryId', verifyToken, async (req, res, next) => {
+
+//     if ( !req.user.admin) {
+//         throw {
+//             name: 'error_requireAdmin', 
+//             error: 'must use token of admin user', 
+//             message: 'must use token of admin user'
+//         };
+//     };
+//     const { username, password } = req.body;
+
+//     try {
+
+//         const result = await DBFUNCTION({ username, password });
+
+//         res.send(result);
+//         next();
+//     }
+//     catch ({ name, message }) {
+//         next({ name, message })
+//     }
+
+// });
 
 
 apiRouter.use((error, req, res, next) => {

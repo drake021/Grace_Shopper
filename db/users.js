@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const createUser = async ({ username, password, email, firstName, lastName, phoneNumber, address, address2, zip, state }) => {
 
     try {
-        const SALT_COUNT = 10;
+        // const SALT_COUNT = 10;
 
         const { rows } = await client.query(`INSERT INTO users(username, password, email, "firstName", "lastName", "phoneNumber", address, address2, zip, state)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
@@ -131,22 +131,26 @@ const getUserByUsername = async (username) => {
     }
 };
 
-const getUserById = async () => {
+const getUserById = async (id) => {
     console.log('running getUserById..');
     try {
 
         const { rows } = await client.query(`
             SELECT * FROM users
-            WHERE username=$1;`, [username]);
+            WHERE id=$1;`, [id]);
         if (!rows[0]) {
-            throw { message: "user id does not exist", name: "idNotExist" }
+            throw { 
+                error: "user id does not exist",
+                message: "user id does not exist", 
+                name: "idNotExist" 
+            }
         }
 
         return rows[0];
     }
 
     catch (error) {
-        console.error('error getting user by Username..', error);
+        console.error('error getting user by id..', error);
         throw error;
     }
 }
