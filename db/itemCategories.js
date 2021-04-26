@@ -1,10 +1,13 @@
+const { testFirstRow } = require(".");
 const { client } = require("./client");
 
 const createItemCategory = async ({ itemId, categoryId }) => {
 
     try {
 
-        const { rows } = await client.query(``, []);
+        const { rows } = await client.query(`INSERT INTO "itemCategories"
+        ("itemId", "categoryId") RETURNING *;`, [itemId, categoryId]);
+        testFirstRow(rows);
 
         return rows[0];
     }
@@ -18,7 +21,9 @@ const getItemCategoriesByItem = async (itemId) => {
 
     try {
 
-        const { rows } = await client.query(``, []);
+        const { rows } = await client.query(`SELECT * FROM "itemCategories" 
+        WHERE "itemId"=($1);`, [itemId]);
+        testFirstRow(rows);
 
         return rows[0];
     }
@@ -32,7 +37,9 @@ const getItemCategoriesByCategory = async (categoryId) => {
 
     try {
 
-        const { rows } = await client.query(``, []);
+        const { rows } = await client.query(`SELECT * FROM "itemCategories" 
+        WHERE "categoryId"=($1)`, [categoryId]);
+        testFirstRow(rows);
 
         return rows[0];
     }
@@ -46,7 +53,10 @@ const removeItemCategory = async (id) => {
 
     try {
 
-        const { rows } = await client.query(``, []);
+        const { rows } = await client.query(`DELETE FROM "itemCategories" 
+        WHERE id=($1)
+        RETURNING *;`, [id]);
+        testFirstRow(rows);
 
         return rows[0];
     }

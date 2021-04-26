@@ -1,7 +1,10 @@
 
 
 const { client } = require("./client");
+const { testFirstRow, getQueryValuesString } = require(".");
 
+
+//creates order; line items attached seperately
 const createOrder = async ({ userId, attn, email, phoneNumber, address, address2, zip, state }) => {
     let dynamicArray = [];
     let dynamicArrayNames = [];
@@ -54,9 +57,7 @@ const createOrder = async ({ userId, attn, email, phoneNumber, address, address2
         INSERT INTO orders
         ${queryValuesString}
         RETURNING *;`, dynamicArray);
-        if (!rows[0]) {
-            throw { name: 'error_createOrder', message: 'failed to create order row' }
-        }
+        testFirstRow(rows);
         return rows[0];
         // returns user object of updated row (not password);
     }
@@ -70,16 +71,15 @@ const createOrder = async ({ userId, attn, email, phoneNumber, address, address2
 //retrieves order row from DB, includes linesItems
 const getOrderById = (id) => {
     console.log('running getOrderById..');
-    try {
 
+    try {
         const { rows } = await client.query(`
             SELECT * FROM orders
             WHERE id=$1;`, [id]);
-        if (!rows[0]) {
-            throw { name: 'idNotExist', message: 'Order Id does not exist' }
-        }
-        //Will want to incliude line items array
-        return rows[0];
+        testFirstRow(rows);
+        const lineItems = await getLineItemsByOrder(id).rows;
+        testFirstRow(lineItems);
+        return { ...rows[0], lineItems: lineItems };
     }
 
     catch (error) {
@@ -92,16 +92,50 @@ const getOrderById = (id) => {
 //updates the order row in database *note line items are handled seperately*
 const updateOrder = ({ id, attn, email, phoneNumber, address, address2, zip, state }) => {
     console.log('running updateOrder..');
-    try {
 
+    try {
+        const [valuesArray, queryValuesString] = getQueryValuesString([
+            {
+                name: 'attn',
+                value: attn,
+                type: 'string'
+            },
+            {
+                name: 'email',
+                value: email,
+                type: 'string'
+            },
+            {
+                name: '"phoneNumber"',
+                value: phoneNumber,
+                type: 'string'
+            },
+            {
+                name: 'address',
+                value: address,
+                type: 'string'
+            },
+            {
+                name: 'address2',
+                value: address2,
+                type: 'string'
+            },
+            {
+                name: 'zip',
+                value: zip,
+                type: 'string'
+            },
+            {
+                name: 'state',
+                value: state,
+                type: 'string'
+            }
+        ], id);
+        // console.log('queryString: ', queryValuesString);
         const { rows } = await client.query(`
-            UPDATE orders
-            SET attn=$1, email=$2, "phoneNumber"=$3, address=$4, address2=$5, zip=$6, state=$7
-            WHERE id=$8
-            RETURNING *;`, [attn, email, phoneNumber, address, address2, zip, state, id]);
-        if (!rows[0]) {
-            throw { name: 'idNotExist', message: 'Order Id does not exist' }
-        }
+            UPDATE orders 
+            ${queryValuesString}`, valuesArray);
+        testFirstRow(rows);
         return rows[0];
     }
 
@@ -119,9 +153,12 @@ const getOrdersByUserId = (id) => {
         const { rows } = await client.query(`
             SELECT * FROM orders
             WHERE "userId"=$1;`, [id]);
-        if (!rows[0]) {
-            throw { name: 'idNotExist', message: 'Order Id does not exist' }
-        }
+        testFirstRow(rows);
+        rows.map(async order => {
+            const lineItems = await getLineItemsByOrder(order.id).rows;
+            const newOrder = { ...order, lineItems: lineItems };
+            return newOrder;
+        })
         return rows;
     }
 
@@ -136,14 +173,18 @@ const deleteOrder = (id) => {
     console.log('running deleteOrder..');
     try {
 
+        const lineItems = await client.query(`
+            DELETE FROM "lineItems"
+            WHERE "orderId"=$1
+            RETURNING *;`, [id]).rows;
+        testFirstRow(lineItems);
         const { rows } = await client.query(`
-        DELETE FROM orders
-        WHERE "id"=$1
-        RETURNING *;`, [id]);
-        if (!rows[0]) {
-            throw { name: 'idNotExist', message: 'Order Id does not exist' }
-        }
-        return rows[0];
+            DELETE FROM orders
+            WHERE "id"=$1
+            RETURNING *;`, [id]);
+        testFirstRow(rows);
+
+        return { ...rows[0], lineItems };
     }
 
     catch (error) {

@@ -8,7 +8,7 @@ const { createUser, loginUser, client, getUserByUsername, updateUser,
     getCategoryById, createItem, getAllItems, getItemById, updateItem,
     removeItem, getLineItemsByOrder, removeLineItem,
     createCategory, getAllCategories, removeCategory, updateCategory, getItemCategoriesByCategory,
-    removeItemCategory, createItemCategory, getItemByItemNumber } = require('./db');
+    removeItemCategory, createItemCategory, getItemByItemNumber, respError } = require('./db');
 
 // create the express server here
 
@@ -102,13 +102,7 @@ const verifyToken = async (req, res, next) => {
         });
     }
 };
-const respError = (name, message) => {
-    return {
-        name: `error_${name}`,
-        message,
-        error: message
-    };
-};
+
 
 // *** templates ***
 

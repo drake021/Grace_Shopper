@@ -1,6 +1,7 @@
 
 const { client } = require("./client");
 const bcrypt = require('bcrypt');
+const { testFirstRow } = require(".");
 
 const createUser = async ({ username, password, email, firstName, lastName, phoneNumber, address, address2, zip, state }) => {
 
@@ -11,6 +12,7 @@ const createUser = async ({ username, password, email, firstName, lastName, phon
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
                 ON CONFLICT (username) DO NOTHING 
                 RETURNING *;`, [username, password, email, firstName, lastName, phoneNumber, address, address2, zip, state]);
+                testFirstRow(rows);
         delete rows[0].password;
         return rows[0];
         //Would also like to do nothing on conflict with email; but haven't figured out how to work it.
@@ -68,9 +70,7 @@ const updateUser = async ({ id, admin, firstName, lastName, email, phoneNumber, 
         ${queryValuesString}
         WHERE id=$${dynamicArray.length}
         RETURNING *;`, dynamicArray);
-        if (!rows[0]) {
-            throw { name: 'error_updateFail', message: 'failed to update user row' }
-        }
+        testFirstRow(rows);
         return rows[0];
         // returns user object of updated row (not password);
     }
@@ -91,12 +91,8 @@ const loginUser = async ({ username, password }) => {
         const { rows } = await client.query(`
             SELECT * FROM users
             WHERE username=$1;`, [username]);
-        console.log('looking at user: ', rows[0]);
-        if (!rows[0]) {
-            console.log('USER DOES NOT EXIST')
-            throw { name: 'USER_NULL', message: 'User does not exist' };
-        }
-        if (rows[0].password == password) {
+        testFirstRow(rows);
+        if (rows[0].password === password) {
             delete rows[0].password;
             return rows[0];
         } else {
@@ -118,6 +114,7 @@ const getUserByUsername = async (username) => {
         const { rows } = await client.query(`
             SELECT * FROM users
             WHERE username=$1;`, [username]);
+        testFirstRow(rows);
         // if (!rows[0]) {
         //     throw { name: "userNotExist", message: "Username does not exist" }
         // }
@@ -138,13 +135,7 @@ const getUserById = async (id) => {
         const { rows } = await client.query(`
             SELECT * FROM users
             WHERE id=$1;`, [id]);
-        if (!rows[0]) {
-            throw { 
-                error: "user id does not exist",
-                message: "user id does not exist", 
-                name: "idNotExist" 
-            }
-        }
+        testFirstRow(rows);
 
         return rows[0];
     }
