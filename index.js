@@ -394,7 +394,6 @@ ordersRouter.delete('/:orderId', verifyToken, async (req, res, next) => {
 
 //POST api/items (**admin**)
 //creates a new item for the item DB; requires a token from an admin user
-
 itemsRouter.post('', verifyToken, async (req, res, next) => {
 
     if (!req.user.admin) {

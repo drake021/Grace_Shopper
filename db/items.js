@@ -11,7 +11,7 @@ const createItem = async ({ itemNumber, description, name, cost, price, onHand }
         const { rows } = await client.query(`INSERT INTO items("itemNumber", "description", name, cost, price, "onHand")
                 VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT ("itemNumber") DO NOTHING 
-                RETURNING *;`, [itemNumber, description, name, cost, price, onHand]);
+                RETURNING *;`, [itemNumber.toUpperCase(), description, name, cost, price, onHand]);
         testFirstRow(rows);
         return rows[0];
     }
@@ -60,6 +60,7 @@ const getItemByItemNumber = async (itemNumber) => {
 
 const getAllItems = async () => {
     try {
+        const _ = null;
         const draftItems = await getNestedTable('items', _, 'categories', getItemCategoriesByItem, _);
         const result = draftItems.map(async draftItem => {
             draftItem.categories = draftItem.categories.map(async (categoryItem) => {

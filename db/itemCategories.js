@@ -1,4 +1,4 @@
-const { testFirstRow } = require("./api");
+const { testFirstRow, respError } = require("./api");
 const { client } = require("./client");
 
 const createItemCategory = async ({ itemId, categoryId }) => {
@@ -23,7 +23,9 @@ const getItemCategoriesByItem = async (itemId) => {
 
         const { rows } = await client.query(`SELECT * FROM "itemCategories" 
         WHERE "itemId"=($1);`, [itemId]);
-        testFirstRow(rows);
+        if(!rows[0]) {
+            return [];
+        }
 
         return rows[0];
     }

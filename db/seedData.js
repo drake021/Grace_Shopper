@@ -53,7 +53,7 @@ async function createTables() {
   await client.query(`CREATE TABLE items (
     id SERIAL PRIMARY KEY,
     "itemNumber" VARCHAR(16) UNIQUE NOT NULL,
-    name VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255),
     description VARCHAR(255),
     cost FLOAT(12),
     price FLOAT(12),
