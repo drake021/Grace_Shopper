@@ -73,6 +73,11 @@ import Link from '@material-ui/core/Link';
 import InputBase from '@material-ui/core/InputBase';
 import SearchIcon from '@material-ui/icons/Search';
 import SearchBar from "material-ui-search-bar";
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
 
 const useStyles = makeStyles((theme) => ({
     icon: {
@@ -100,6 +105,10 @@ const useStyles = makeStyles((theme) => ({
     cardContent: {
         flexGrow: 1,
     },
+    formControl: {
+        margin: theme.spacing(1),
+        minWidth: 240,
+      },
 }));
 
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -136,6 +145,18 @@ const Catalog = () => {
                                         // onChange={(newValue) => this.setState({ value: newValue })}
                                         // onRequestSearch={() => doSomethingWith(this.state.value)}
                                     />
+                                     <div>
+      <FormControl className={classes.formControl}>
+        <InputLabel htmlFor="grouped-native-select">Select a Category</InputLabel>
+        <Select native defaultValue="" id="grouped-native-select">
+          <option aria-label="None" value="" />
+            <option value={1}>Category 1</option>
+            <option value={2}>Category 2</option>
+            <option value={3}>Category 3</option>
+            <option value={4}>Cateogry 4</option>
+        </Select>
+      </FormControl>
+    </div>
                                 </Grid>
                             </Grid>
                         </div>

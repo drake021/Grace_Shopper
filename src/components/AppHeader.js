@@ -91,18 +91,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-// return <>
-//     <div id='AppHeader'>
-//         <div>
-//             Hamburger icon
-//         </div>
-//         <div>
-//             LOGO
-//         </div>
-//         <Auth />
-//     </div>
-// </>
-
 const AppHeader = () => {
   const classes = useStyles();
   const theme = useTheme();

@@ -5,7 +5,9 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-
+import { Link } from 'react-router-dom';
+// import Paper from '@material-ui/Paper';
+import Image from '../img/home-background.jpg';
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -40,7 +42,7 @@ const Home = () => {
             <div className={classes.heroButtons}>
               <Grid container spacing={2} justify="center">
                 <Grid item>
-                  <Button variant="contained" color="primary">
+                  <Button variant="contained" color="primary" component={Link} to="/catalog">
                     Collectible Catalog
                   </Button>
                 </Grid>
