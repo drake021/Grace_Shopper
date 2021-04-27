@@ -1,6 +1,6 @@
 export { default as App } from './App.js';
 export { default as AppHeader } from './AppHeader.js';
-// export { default as Cart } from './Cart.js';
+export { default as Cart } from './Cart.js';
 export { default as Nav } from './Nav.js';
 export { default as Orders } from './Orders.js';
 export { default as ViewOrder } from './ViewOrder.js';

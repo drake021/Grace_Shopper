@@ -6,7 +6,7 @@ Home,
 ViewProduct,
 Catalog,
 User,
-Cart,
+// Cart,
 Checkout,
 ViewOrder,
 Orders,
@@ -24,7 +24,7 @@ const App = () => {
 
   return <>
     <AppHeader />
-    <Nav />
+    {/* <Nav /> */}
     <Switch>
     <Route path='/api/documents'>
         <ApiDocuments />
@@ -44,9 +44,9 @@ const App = () => {
       <Route path='/user'>
         <User />
       </Route>
-      <Route path='/cart'>
+      {/* <Route path='/cart'>
         <Cart />
-      </Route>
+      </Route> */}
       <Route path='/checkout'>
         <Checkout />
       </Route>

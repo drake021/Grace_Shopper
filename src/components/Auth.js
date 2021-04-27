@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import Button from '@material-ui/core/Button';
 
 const Auth = ({ user, setUser, setMyRoutines }) => {
     //need to make it to where clicking register takes you to a /register route
@@ -105,12 +106,12 @@ const Auth = ({ user, setUser, setMyRoutines }) => {
                     <input type='password' onChange={passwordOnChange} />
                 </div>
                 <div className='auth-row'>
-                    <button onClick={loginOnClick}>
+                    <Button onClick={loginOnClick}>
                         Login
-                    </button>
-                    <button onClick={displayBase}>
+                    </Button>
+                    <Button onClick={displayBase}>
                         Cancel
-                    </button>
+                    </Button>
                 </div>
                 <div className='auth-row'>
                     <div style={{color: 'red'}}>
@@ -141,12 +142,12 @@ const Auth = ({ user, setUser, setMyRoutines }) => {
                     <input type='password' onChange={confirmPasswordOnChange} />
                 </div>
                 <div className='auth-row'>
-                    <button onClick={registerOnClick}>
+                    <Button onClick={registerOnClick}>
                         Register
-                    </button>
-                    <button onClick={displayBase}>
+                    </Button>
+                    <Button onClick={displayBase}>
                         Cancel
-                    </button>
+                    </Button>
                 </div>
                 <div className='auth-row'>
                     <div style={{color: 'red'}}>
@@ -157,8 +158,8 @@ const Auth = ({ user, setUser, setMyRoutines }) => {
         }
         //base form, user not logged in
         return <div id='Auth'>
-            <button onClick={displayRegister}>Register</button>
-            <button onClick={displayLogin}>Login</button>
+            <Button onClick={displayRegister}>Register</Button>
+            <Button onClick={displayLogin}>Login</Button>
         </div>
     }
     //User is logged in
@@ -169,7 +170,7 @@ const Auth = ({ user, setUser, setMyRoutines }) => {
         </div>
         </div>
         <div className='auth-row'>
-            <button onClick={logoutOnClick}>Logout</button>
+            <Button onClick={logoutOnClick}>Logout</Button>
         </div>
     </div>
 
