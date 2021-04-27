@@ -4,8 +4,7 @@ const { client } = require('./client');
 // console.log('client is this in seedDate: ', client);
 const { 
   createUser,
-  loginUser,
-  getUserByUsername
+  updateUser
 } = require('./index');
 
 
@@ -54,7 +53,7 @@ async function createTables() {
   await client.query(`CREATE TABLE items (
     id SERIAL PRIMARY KEY,
     "itemNumber" VARCHAR(16) UNIQUE NOT NULL,
-    name VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255),
     description VARCHAR(255),
     cost FLOAT(12),
     price FLOAT(12),
@@ -78,7 +77,12 @@ async function createTables() {
     id SERIAL PRIMARY KEY,
     "orderId" INT REFERENCES orders(id),
     "itemId" INT REFERENCES items(id),
-    quantity INT
+    ln INT,
+    quantity INT,
+    cost FLOAT(12),
+    price FLOAT(12),
+    name VARCHAR(255),
+    description VARCHAR(255)
   );`);
   console.log('creating categories..');
   await client.query(`CREATE TABLE categories (
@@ -112,7 +116,7 @@ async function createInitialUsers() {
   try {
 
     const usersToCreate = [
-      { username: 'albert', password: 'bertie99', email: 'albert@getMaxListeners.com' },
+      { username: 'admin', password: 'password', email: 'admin@localhost.com' },
       { username: 'sandra', password: 'sandra123', email: 'sandra@gmail.com' },
       { username: 'glamgal', password: 'glamgal123', email: 'glamgal@gmail.com' },
     ]
@@ -120,6 +124,8 @@ async function createInitialUsers() {
 
     console.log('Users created:');
     console.log(users);
+    const adminUser = await updateUser({admin: true, id: 1});
+    console.log('admin user updated: ', adminUser);
     console.log('Finished creating users!');
   } catch (error) {
     console.error('Error creating users!');

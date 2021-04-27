@@ -1,17 +1,18 @@
+const { getCategoryById } = require("./categories");
 const { client } = require("./client");
+const { testFirstRow, getNestedTable, deleteReferencedTable } = require("./api");
+const { getItemCategoriesByItem } = require("./itemCategories");
 
 //creates new item row in DB
-const createItem = async ({ itemNumber, description, name, cost, price }) => {
+const createItem = async ({ itemNumber, description, name, cost, price, onHand }) => {
 
     try {
 
-        const { rows } = await client.query(`INSERT INTO items("itemNumber", "description", name, cost, price)
-                VALUES ($1, $2, $3, $4, $5)
+        const { rows } = await client.query(`INSERT INTO items("itemNumber", "description", name, cost, price, "onHand")
+                VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT ("itemNumber") DO NOTHING 
-                RETURNING *;`, [itemNumber, description, name, cost, price]);
-        if (!rows[0]) {
-            throw {name: "itemNumberDuplicate", message: "item number already exist!"}
-        }
+                RETURNING *;`, [itemNumber.toUpperCase(), description, name, cost, price, onHand]);
+        testFirstRow(rows);
         return rows[0];
     }
 
@@ -23,25 +24,91 @@ const createItem = async ({ itemNumber, description, name, cost, price }) => {
 };
 
 //reads item row by id, includes categories
-const getItemById = (id) => {
+const getItemById = async (id) => {
+    try {
+
+        const draftItem = await getNestedTable('items', 'id', 'categories', getItemCategoriesByItem, id)[0];
+        draftItem.categories = draftItem.categories.map(async (categoryItem) => {
+            return await getCategoryById(categoryItem.categoryId);
+        });
+        return draftItem;
+    }
+
+    catch (error) {
+        console.error('error creating item..', error);
+        throw error;
+    }
 
     // returns an item object
 };
-const getItemByItemNumber = (itemNumber) => {
+//return item object in database by itemNumber
+const getItemByItemNumber = async (itemNumber) => {
+    try {
+        const draftItem = await getNestedTable('items', '"itemNumber"', 'categories', getItemCategoriesByItem, itemNumber)[0];
+        draftItem.categories = draftItem.categories.map(async (categoryItem) => {
+            return await getCategoryById(categoryItem.categoryId);
+        });
+        return draftItem;
+    }
 
+    catch (error) {
+        console.error('error creating item..', error);
+        throw error;
+    }
 };
+//returns all item objects in database
 
+const getAllItems = async () => {
+    try {
+        const _ = null;
+        const draftItems = await getNestedTable('items', _, 'categories', getItemCategoriesByItem, _);
+        const result = draftItems.map(async draftItem => {
+            draftItem.categories = draftItem.categories.map(async (categoryItem) => {
+                return await getCategoryById(categoryItem.categoryId);
+            });
+            return draftItem;
+        })
+        return result;
+    }
+
+    catch (error) {
+        console.error('error getAllItems..', error);
+        throw error;
+    }
+};
 //updates an item row by id
-const updateItem = ({id, itemNumber, name, description, cost, price, onHand, allocated}) => {
+const updateItem = async ({ id, name, description, cost, price, onHand }) => {
+    [valuesArray, queryValuesString] = getQueryValuesString();
+    const valuesArray = [name, description, cost, price, onHand, id]
+    try {
 
+        const { rows } = await client.query(`UPDATE items ${queryValuesString}`, valuesArray);
+        testFirstRow(rows);
+        return rows[0];
+    }
+
+    catch (error) {
+        console.error('error updating item..', error);
+        throw error;
+    }
     // returns updated item object
 };
 
 //deletes item row from DB
-const deleteItem = (id) {
 
+const removeItem = async (id) => {
+    try {
+        return await deleteReferencedTable('items', '"itemCategories"', '"itemId"', id);
+    }
+
+    catch (error) {
+        console.error('error updating item..', error);
+        throw error;
+    }
     // returns null or success message
 };
+
+
 
 // example item object
 // {
@@ -60,8 +127,9 @@ const deleteItem = (id) {
 
 module.exports = {
     createItem,
+    getAllItems,
     getItemById,
     getItemByItemNumber,
     updateItem,
-    deleteItem
+    removeItem
 }

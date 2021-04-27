@@ -1,14 +1,14 @@
 const { client } = require("./client");
+const { testFirstRow, respError } = require("./api");
 
-
-
-const createCategory = async ({name, priority}) => {
+const createCategory = async (name) => {
 
     try {
 
         const { rows } = await client.query(`INSERT INTO "routineActivities"(name, priority)
                 VALUES ($1, $2, $3, $4)
                 RETURNING *;`, [name, priority]);
+        testFirstRow(rows);
 
         return rows[0];
     }
@@ -17,94 +17,88 @@ const createCategory = async ({name, priority}) => {
         console.error('error creating activity..', error);
         throw error;
     }
-}
-// addActivityToRoutine({ routineId, activityId, count, duration })
-// create a new routine_activity, and return it
+};
+const getCategoryById = async (id) => {
 
-const getRoutineActivityById = async (id) => {
-    console.log('Running getRoutineActivityById ...');
     try {
 
-        const { rows } = await client.query(`
-            SELECT * FROM "routineActivities"
-            WHERE id=$1;`, [id]);
+        const { rows } = await client.query(`SELECT * FROM categories WHERE id=$1;`, [id]);
+        testFirstRow(rows);
+        return rows[0];
+    }
+
+    catch (error) {
+        console.error('error getCategoryById..', error);
+        throw error;
+    }
+};
+const getAllCategories = async () => {
+
+    try {
+
+        const { rows } = await client.query(`SELECT * FROM categories;`);
+        testFirstRow(rows);
 
         return rows[0];
     }
 
     catch (error) {
-        console.error('error getting routineActivity by Id..', error);
+        console.error('error getAllCategories..', error);
         throw error;
     }
-}
-// getRoutineActivityById(id)
-// return the routine_activity
+};
+const updateCategory = async ({id, name}) => {
 
-
-const updateRoutineActivity = async ({ id, count, duration }) => {
-    console.log('Running updateRoutineActivity ...');
     try {
-        if(!count || !duration) {
-            console.error(`missing count or duration for update`);
-            throw 'missing count or duration for update';
+        if ( typeof(name) !== "string" ) {
+            throw respError('missingName', 'need to input valid string for name');
         }
+        const { rows } = await client.query(`UPDATE categorioes 
+        SET name=$1 
+        WHERE id=($2)
+        RETURNING *;`, [name, id]);
+        testFirstRow(rows);
 
-        const { rows } = await client.query(`
-            UPDATE "routineActivities"
-            SET count=$2, duration=$3
-            WHERE id=$1
-            RETURNING *;`, [id, count, duration]);
         return rows[0];
     }
 
     catch (error) {
-        console.error('error updating routine activity..', error);
+        console.error('error updateCategory..', error);
         throw error;
     }
-}
-// updateRoutineActivity({ id, count, duration })
-// Find the routine with id equal to the passed in id
-// Update the count or duration as necessary
+};
+//deletes category from DB by id
+const removeCategory = async (id) => {
 
-const destroyRoutineActivity = async (id) => {
-    console.log('Running destroyRoutineActivity ...');
     try {
+        const deleteReferencedTable = async ({topTable, bottomTable, referenceName, id}) => {
+            const deletedBottomRows = await client.query(`DELETE FROM $1  
+            WHERE id=($2) 
+            RETURNING *;`, [bottomTable, id]).rows;
+            testFirstRow(deletedBottomRows);
+            const deletedTopRow = await client.query(`DELETE FROM $1  
+            WHERE $2=($3) 
+            RETURNING *;`, [ topTable, referenceName, id ]).rows;
+            testFirstRow(deletedTopRow);
+            deletedTopRow[bottomTable] = deletedBottomRows;
+            return deletedTopRow;
 
-        await client.query(`
-            DELETE FROM "routineActivities"
-            WHERE id=$1;`, [id]);
+        };
+        return deleteReferencedTable('categories', '"itemCategories', 'categoryId', id);
+
     }
 
     catch (error) {
-        console.error('error destroying routine activity..', error);
+        console.error('error renoveCategory..', error);
         throw error;
     }
-}
-// destroyRoutineActivity(id)
-// remove routine_activity from database
-
-const getRoutineActivitiesByRoutine = async ({id}) => {
-    console.log('Running getRoutineActivitiesByRoutine ...');
-    try {
-        const { rows } = await client.query(`
-            SELECT * FROM "routineActivities"
-            WHERE "routineId"=$1;`, [id]);
-        return rows;
-    }
-
-    catch (error) {
-        console.error('error getting routine activities by routine..', error);
-        throw error;
-    }
-}
-// getRoutineActivitiesByRoutine({ id })
-// select and return an array of all routine_activity records
+};
     
 
 module.exports = {
-    addActivityToRoutine,
-    getRoutineActivityById,
-    updateRoutineActivity,
-    destroyRoutineActivity,
-    getRoutineActivitiesByRoutine
+    createCategory,
+    getAllCategories,
+    removeCategory,
+    getCategoryById,
+    updateCategory
 }
