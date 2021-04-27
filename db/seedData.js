@@ -4,8 +4,7 @@ const { client } = require('./client');
 // console.log('client is this in seedDate: ', client);
 const { 
   createUser,
-  loginUser,
-  getUserByUsername
+  updateUser
 } = require('./index');
 
 
@@ -117,7 +116,7 @@ async function createInitialUsers() {
   try {
 
     const usersToCreate = [
-      { username: 'albert', password: 'bertie99', email: 'albert@getMaxListeners.com' },
+      { username: 'admin', password: 'password', email: 'admin@localhost.com' },
       { username: 'sandra', password: 'sandra123', email: 'sandra@gmail.com' },
       { username: 'glamgal', password: 'glamgal123', email: 'glamgal@gmail.com' },
     ]
@@ -125,6 +124,8 @@ async function createInitialUsers() {
 
     console.log('Users created:');
     console.log(users);
+    const adminUser = await updateUser({admin: true, id: 1});
+    console.log('admin user updated: ', adminUser);
     console.log('Finished creating users!');
   } catch (error) {
     console.error('Error creating users!');

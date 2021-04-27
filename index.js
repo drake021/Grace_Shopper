@@ -3,12 +3,12 @@ if (testDotenv.error) { console.log(testDotenv.error) }
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
 
-const { createUser, loginUser, client, getUserByUsername, updateUser,
-    createOrder, createLineItem, deleteOrder, getItemCategoriesByItem,
+const { createUser, loginUser, getAllUsers, client, getUserByUsername, updateUser,
+    createOrder, updateOrder, createLineItem, deleteOrder, getItemCategoriesByItem,
     getCategoryById, createItem, getAllItems, getItemById, updateItem,
     removeItem, getLineItemsByOrder, removeLineItem,
     createCategory, getAllCategories, removeCategory, updateCategory, getItemCategoriesByCategory,
-    removeItemCategory, createItemCategory, getItemByItemNumber, respError } = require('./db');
+    removeItemCategory, createItemCategory, getItemByItemNumber, respError, getUserById } = require('./db');
 
 // create the express server here
 
@@ -90,6 +90,7 @@ const verifyToken = async (req, res, next) => {
 
             if (id) {
                 req.user = await getUserById(id);
+                console.log('user verified: ', req.user);
                 next();
             }
         } catch ({ name, message }) {
@@ -146,7 +147,7 @@ apiRouter.get('/health', (req, res, next) => {
 // ***users***
 // POST /users/register
 // Create a new user. Require username and password, and hash password before saving user to DB. Require all passwords to be at least 8 characters long.
-
+// BROKEN
 usersRouter.post('/register', async (req, res, next) => {
     const { username, password, admin, firstName, lastName, email, phoneNumber, address, address2, zip, state } = req.body;
 
@@ -191,7 +192,6 @@ usersRouter.post('/login', requireUsername, requirePassword, async (req, res, ne
 
 // GET /api/users (**Admin)
 //returns all users but without passwords
-
 usersRouter.get('', verifyToken, async (req, res, next) => {
 
     if (!req.user.admin) {
@@ -224,7 +224,7 @@ usersRouter.get('', verifyToken, async (req, res, next) => {
 
 // PATCH /api/users/:userId
 //updated user row **admin** or **owner**
-
+// NOT TESTED
 usersRouter.patch('/:userId', verifyToken, async (req, res, next) => {
 
     if (!req.user) {
@@ -269,9 +269,15 @@ usersRouter.patch('/:userId', verifyToken, async (req, res, next) => {
 //creates a new Order; if token provided then assign creator id
 //pass in optional "lineItems" array to have line items added to new order.
 ordersRouter.post('', verifyToken, async (req, res, next) => {
+    console.log('running POST api/orders ...')
     const { attn, email, phoneNumber, address, address2, zip, state, lineItems } = req.body;
+    let userId;
     if (!!req.user) {
-        const userId = req.user.id;
+        console.log('req.user true');
+        userId = req.user.id;
+    } else {
+        console.log('req.user false');
+        userId = false;
     }
 
     try {
@@ -280,7 +286,7 @@ ordersRouter.post('', verifyToken, async (req, res, next) => {
 
         // 
         if (!lineItems || !Array.isArray(lineItems)) {
-            res.send(newOrder);
+            res.send({newOrder});
             next();
         } else {
             // if there are line items...
@@ -294,16 +300,16 @@ ordersRouter.post('', verifyToken, async (req, res, next) => {
             next();
         }
 
-        res.send({ message: 'create order success!', newOrder });
-        next();
+        // res.send({ message: 'create order success!', newOrder });
+        // next();
     }
     catch ({ name, message }) {
         next({ name, message })
     }
 });
 
-//PATCH api/orders/:orderId (admin command?)
-
+//PATCH api/orders/:orderId (**admin**)
+//updates order by order id with optional values; returns updated order
 ordersRouter.patch('/:orderId', verifyToken, async (req, res, next) => {
 
     if (!req.user.admin) {
@@ -339,7 +345,7 @@ ordersRouter.patch('/:orderId', verifyToken, async (req, res, next) => {
 });
 
 //DELETE api/orders/:orderId (**admin**)
-
+//BROKEN
 ordersRouter.delete('/:orderId', verifyToken, async (req, res, next) => {
 
     if (!req.user.admin) {
@@ -377,6 +383,12 @@ ordersRouter.delete('/:orderId', verifyToken, async (req, res, next) => {
     }
 
 });
+
+//GET api/orders
+//returns all orders
+
+//GET api/orders/:orderId
+//returns order by order id
 
 // *** Items ***
 
@@ -627,8 +639,8 @@ lineItemsRouter.patch('/:lineItemId', verifyToken, async (req, res, next) => {
         throw respError('invalid_data', 'data provided in body is invalid or missing')
     }
     try {
-
-        const updatedLineItem = await updateLineItem({ lineItemId, quantity, cost, price, name, description });
+        const id = lineItemId
+        const updatedLineItem = await updateLineItem({ id, quantity, cost, price, name, description });
 
         res.send(updatedLineItem);
         next();

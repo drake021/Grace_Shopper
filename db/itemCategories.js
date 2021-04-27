@@ -1,4 +1,4 @@
-const { testFirstRow } = require(".");
+const { testFirstRow } = require("./api");
 const { client } = require("./client");
 
 const createItemCategory = async ({ itemId, categoryId }) => {

@@ -1,6 +1,7 @@
-const { testFirstRow } = require(".");
+const { testFirstRow, getQueryValuesString } = require("./api");
 const { client } = require("./client");
 
+//attaches a lineItem to order
 const createLineItem = async ({ itemId, orderId, quantity, cost, price, name, description }) => {
 
     try {
@@ -18,6 +19,7 @@ const createLineItem = async ({ itemId, orderId, quantity, cost, price, name, de
         throw error;
     }
 };
+//returns lines items in order
 const getLineItemsByOrder = async (id) => {
 
     try {
@@ -34,14 +36,38 @@ const getLineItemsByOrder = async (id) => {
         throw error;
     }
 };
+//updates lineItems, id & min 1 value req.
 const updateLineItem = async ({ id, quantity, cost, price, name, description }) => {
 
     try {
-        const valuesArray = [quantity, cost, price, name, description, id]
+        const [ valuesArray, queryValuesString] = getQueryValuesString({
+            name: "quantity",
+            value: quantity,
+            type: "number"
+        },
+        {
+            name: "cost",
+            value: cost,
+            type: "number"
+        },
+        {
+            name: "price",
+            value: price,
+            type: "number"
+        },
+        {
+            name: "name",
+            value: name,
+            type: "string"
+        },
+        {
+            name: "description",
+            value: description,
+            type: "string"
+        }
+        , id);
         const { rows } = await client.query(`UPDATE "lineItems" 
-        SET quantity=($1), cost=($2), price=($3), name=$4, description=$5 
-        WHERE id=($6) 
-        RETURNING *;`, [valuesArray]);
+        ${queryValuesString}`, [valuesArray]);
         testFirstRow(rows);
 
         return rows[0];
@@ -52,6 +78,7 @@ const updateLineItem = async ({ id, quantity, cost, price, name, description }) 
         throw error;
     }
 };
+//removes lineItem
 const removeLineItem = async (id) => {
 
     try {

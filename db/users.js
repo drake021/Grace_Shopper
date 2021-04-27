@@ -1,7 +1,7 @@
 
 const { client } = require("./client");
 const bcrypt = require('bcrypt');
-const { testFirstRow } = require(".");
+const { testFirstRow } = require("./api");
 
 const createUser = async ({ username, password, email, firstName, lastName, phoneNumber, address, address2, zip, state }) => {
 
@@ -29,11 +29,13 @@ const updateUser = async ({ id, admin, firstName, lastName, email, phoneNumber, 
     let dynamicArray = [];
     let dynamicArrayNames = [];
     const verifyValue = (value, type = 'string', name) => {
+        if (type === null) { type = 'string'};
         if (typeof (value) === type) {
             dynamicArray.push(value);
             dynamicArrayNames.push(name);
         }
     };
+    const _ = null;
     const getQueryValuesString = () => {
         let queryValuesString = `SET `;
         verifyValue(admin, 'boolean', 'admin');
@@ -144,7 +146,24 @@ const getUserById = async (id) => {
         console.error('error getting user by id..', error);
         throw error;
     }
-}
+};
+
+const getAllUsers = async () => {
+    console.log('running getUserById..');
+    try {
+
+        const { rows } = await client.query(`
+            SELECT * FROM users;`);
+        testFirstRow(rows);
+
+        return rows[0];
+    }
+
+    catch (error) {
+        console.error('error getAllUsers..', error);
+        throw error;
+    }
+};
 
 
 
@@ -153,5 +172,6 @@ module.exports = {
     loginUser,
     getUserByUsername,
     getUserById,
-    updateUser
+    updateUser,
+    getAllUsers
 }

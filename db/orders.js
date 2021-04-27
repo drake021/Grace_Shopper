@@ -1,33 +1,36 @@
 
 
 const { client } = require("./client");
-const { testFirstRow, getQueryValuesString } = require(".");
+const { testFirstRow, getQueryValuesString, getNestedTable } = require("./api");
+const { getLineItemsByOrder } = require("./lineItems");
 
 
 //creates order; line items attached seperately
 const createOrder = async ({ userId, attn, email, phoneNumber, address, address2, zip, state }) => {
+    console.log('creating orders...');
+    console.log(userId, attn, email, phoneNumber, address, address2, zip, state);
     let dynamicArray = [];
     let dynamicArrayNames = [];
     const verifyValue = (value, type = 'string', name) => {
+        if (type === null) { type='string' };
         if (typeof (value) === type) {
             dynamicArray.push(value);
             dynamicArrayNames.push(name);
         }
     };
+    const _ = null;
     const getQueryValuesString = () => {
+        console.log('getting query string..');
         let queryValuesString = `(`;
-        verifyValue(admin, 'boolean', 'admin');
         verifyValue(userId, 'number', '"userId"');
         verifyValue(attn, _, 'attn');
-        verifyValue(firstName, _, '"firstName"');
-        verifyValue(lastName, _, '"lastName"');
-        verifyValue(firstName, _, '"firstName"');
         verifyValue(email, _, 'email');
-        verifyValue(phoneNumber, _, 'phoneNumber');
+        verifyValue(phoneNumber, _, '"phoneNumber"');
         verifyValue(address, _, 'address');
         verifyValue(address2, _, 'address2');
         verifyValue(zip, _, 'zip');
         verifyValue(state, _, 'state');
+        console.log(dynamicArray, dynamicArrayNames);
         if (dynamicArray.length < 1) {
             throw { name: 'error_noInputValues', message: 'missing input values for database' }
         }
@@ -69,7 +72,7 @@ const createOrder = async ({ userId, attn, email, phoneNumber, address, address2
 };
 
 //retrieves order row from DB, includes linesItems
-const getOrderById = (id) => {
+const getOrderById = async (id) => {
     console.log('running getOrderById..');
 
     try {
@@ -89,8 +92,10 @@ const getOrderById = (id) => {
     //returns order object
 };
 
+//gets all order rows from DB, includes lineItems
+
 //updates the order row in database *note line items are handled seperately*
-const updateOrder = ({ id, attn, email, phoneNumber, address, address2, zip, state }) => {
+const updateOrder = async ({ id, attn, email, phoneNumber, address, address2, zip, state }) => {
     console.log('running updateOrder..');
 
     try {
@@ -146,20 +151,11 @@ const updateOrder = ({ id, attn, email, phoneNumber, address, address2, zip, sta
     //returns order object
 };
 //gets all orders by userId; includes lineItems
-const getOrdersByUserId = (id) => {
+const getOrdersByUserId = async (id) => {
     console.log('running getOrdersByUserId..');
     try {
 
-        const { rows } = await client.query(`
-            SELECT * FROM orders
-            WHERE "userId"=$1;`, [id]);
-        testFirstRow(rows);
-        rows.map(async order => {
-            const lineItems = await getLineItemsByOrder(order.id).rows;
-            const newOrder = { ...order, lineItems: lineItems };
-            return newOrder;
-        })
-        return rows;
+        return await getNestedTable('orders', '"userId"', "lineItems", getLineItemsByOrder, id);
     }
 
     catch (error) {
@@ -169,22 +165,23 @@ const getOrdersByUserId = (id) => {
 }
 
 //deletes the order row in DB by id; will delete lineItems associated with the order first
-const deleteOrder = (id) => {
+//NEEDS ADJUSTING
+const deleteOrder = async (id) => {
     console.log('running deleteOrder..');
     try {
 
         const lineItems = await client.query(`
             DELETE FROM "lineItems"
-            WHERE "orderId"=$1
-            RETURNING *;`, [id]).rows;
-        testFirstRow(lineItems);
-        const { rows } = await client.query(`
-            DELETE FROM orders
-            WHERE "id"=$1
+            WHERE "orderId"=($1)
             RETURNING *;`, [id]);
-        testFirstRow(rows);
+            console.log(lineItems);
+        const fields = await client.query(`
+            DELETE FROM orders
+            WHERE "id"=($1)
+            RETURNING *;`, [id]);
+            console.log(fields);
 
-        return { ...rows[0], lineItems };
+        return [ fields, lineItems ];
     }
 
     catch (error) {
@@ -193,39 +190,6 @@ const deleteOrder = (id) => {
     }
     //returns null
 };
-
-//order object returned
-
-// {
-//     id: 0,
-//     userId: null,
-//     attn: 'Rick Scott',
-//     email: 'person@site.com',
-//     phoneNumber: '904-294-1924',
-//     address: 'string',
-//     address2: 'string',
-//     zip: '32224',
-//     state: 'FL',
-//     lineItems: [
-//         {
-//             item:  {
-//                     id: 0,
-//                     itemNumber: 'REDSHIRT', //item number will always be converted to caps. only '_' and '-' special characters
-//                     name: 'Red T-Shirt',
-//                     description: 'A mervelous red shirt, the tee kind.',
-//                     cost: 5.48,
-//                     price: 8.99,
-//                     onHand: 22,
-//                     allocated: 4,
-//                     categories: [{id: 0, name: 'shirts'}, {id:1, name: 'pants'}]
-//                 },
-//             qty: 22
-//         },
-//          {ect..},
-//          {ect...}
-//     ]
-
-// }
 
 module.exports = {
     createOrder,

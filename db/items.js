@@ -1,5 +1,7 @@
+const { getCategoryById } = require("./categories");
 const { client } = require("./client");
-const { testFirstRow } = require("./index");
+const { testFirstRow, getNestedTable, deleteReferencedTable } = require("./api");
+const { getItemCategoriesByItem } = require("./itemCategories");
 
 //creates new item row in DB
 const createItem = async ({ itemNumber, description, name, cost, price, onHand }) => {
@@ -22,13 +24,14 @@ const createItem = async ({ itemNumber, description, name, cost, price, onHand }
 };
 
 //reads item row by id, includes categories
-// NEEDS TO INCLUDE CATEGORIES
-const getItemById = (id) => {
+const getItemById = async (id) => {
     try {
 
-        const { rows } = await client.query(`SELECT * FROM items WHERE id=($1);`, [id]);
-        testFirstRow(rows);
-        return rows[0];
+        const draftItem = await getNestedTable('items', 'id', 'categories', getItemCategoriesByItem, id)[0];
+        draftItem.categories = draftItem.categories.map(async (categoryItem) => {
+            return await getCategoryById(categoryItem.categoryId);
+        });
+        return draftItem;
     }
 
     catch (error) {
@@ -39,13 +42,13 @@ const getItemById = (id) => {
     // returns an item object
 };
 //return item object in database by itemNumber
-//NEEDS TO INCLUDE CATEGORIES
-const getItemByItemNumber = (itemNumber) => {
+const getItemByItemNumber = async (itemNumber) => {
     try {
-
-        const { rows } = await client.query(`SELECT * FROM items WHERE "itemNumber"=($1);`, [itemNumber]);
-        testFirstRow(rows);
-        return rows[0];
+        const draftItem = await getNestedTable('items', '"itemNumber"', 'categories', getItemCategoriesByItem, itemNumber)[0];
+        draftItem.categories = draftItem.categories.map(async (categoryItem) => {
+            return await getCategoryById(categoryItem.categoryId);
+        });
+        return draftItem;
     }
 
     catch (error) {
@@ -54,28 +57,31 @@ const getItemByItemNumber = (itemNumber) => {
     }
 };
 //returns all item objects in database
-//NEEDS TO INCLUDE CATEGORIES
-const getAllItems = () => {
+
+const getAllItems = async () => {
     try {
-        const { rows } = await client.query(`SELECT * FROM items;`);
-        testFirstRow(rows);
-        return rows;
+        const draftItems = await getNestedTable('items', _, 'categories', getItemCategoriesByItem, _);
+        const result = draftItems.map(async draftItem => {
+            draftItem.categories = draftItem.categories.map(async (categoryItem) => {
+                return await getCategoryById(categoryItem.categoryId);
+            });
+            return draftItem;
+        })
+        return result;
     }
 
     catch (error) {
-        console.error('error creating item..', error);
+        console.error('error getAllItems..', error);
         throw error;
     }
 };
 //updates an item row by id
-//should update this so some fields are optional
-const updateItem = ({ id, name, description, cost, price, onHand }) => {
+const updateItem = async ({ id, name, description, cost, price, onHand }) => {
+    [valuesArray, queryValuesString] = getQueryValuesString();
     const valuesArray = [name, description, cost, price, onHand, id]
     try {
 
-        const { rows } = await client.query(`UPDATE items 
-        SET name=$1, description=$2, cost=($3), price=($4), "onHand"=($5)
-        WHERE id=($6);`, valuesArray);
+        const { rows } = await client.query(`UPDATE items ${queryValuesString}`, valuesArray);
         testFirstRow(rows);
         return rows[0];
     }
@@ -88,12 +94,10 @@ const updateItem = ({ id, name, description, cost, price, onHand }) => {
 };
 
 //deletes item row from DB
-//NEEDS TO DELETE ITEM CATEGORIES THAT ARE ASSOCIATED
-const removeItem = (id) => {
+
+const removeItem = async (id) => {
     try {
-        const { rows } = await client.query(`DELETE FROM items WHERE id=($1) RETURNING *;`, [id]);
-        testFirstRow(rows);
-        return rows[0];
+        return await deleteReferencedTable('items', '"itemCategories"', '"itemId"', id);
     }
 
     catch (error) {
@@ -102,6 +106,8 @@ const removeItem = (id) => {
     }
     // returns null or success message
 };
+
+
 
 // example item object
 // {
