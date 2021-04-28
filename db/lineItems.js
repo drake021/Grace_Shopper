@@ -2,13 +2,15 @@ const { testFirstRow, getQueryValuesString } = require("./api");
 const { client } = require("./client");
 
 //attaches a lineItem to order
+//technically works
 const createLineItem = async ({ itemId, orderId, quantity, cost, price, name, description }) => {
 
     try {
-        const valuesArray = [itemId, orderId, quantity, cost, price, name, description]
+        const valuesArray = [itemId, orderId, quantity, cost, price, name, description];
+        console.log('creating lineItm sql')
         const { rows } = await client.query(`INSERT INTO "lineItems"("itemId", "orderId", quantity, cost, price, name, description) 
-        VALUES ($1, $2, $3, $4, $5, $76, $7)
-        RETURNING *;`, [valuesArray]);
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *;`, valuesArray);
         testFirstRow(rows);
 
         return rows[0];
