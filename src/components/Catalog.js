@@ -58,7 +58,7 @@
 
 // export default Catalog;
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -78,13 +78,28 @@ import MenuItem from '@material-ui/core/MenuItem';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
+import Image from '../img/background.gif';
+import { fetchCatalog } from '../api/index.js';
+
+
+
+
 
 const useStyles = makeStyles((theme) => ({
+    "@global": {
+		main: {
+      backgroundImage: `url(${Image})`,
+			backgroundRepeat: "no-repeat",
+			backgroundPosition: "center center",
+			backgroundSize: "cover",
+			backgroundAttachment: "fixed",
+			height: "100%"
+		},
+  },
     icon: {
         marginRight: theme.spacing(2),
     },
     heroContent: {
-        backgroundColor: theme.palette.background.paper,
         padding: theme.spacing(8, 0, 6),
     },
     heroButtons: {
@@ -115,6 +130,17 @@ const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 const Catalog = () => {
     const classes = useStyles();
+    const [catalogList, setCatalogList] = useState([]);
+
+    useEffect(() => {
+        fetchCatalog().then(items => {
+            setCatalogList(items)
+        })
+            .catch(error => {
+            });
+    }, []);
+
+    console.log(catalogList);
 
     return (
         <React.Fragment>
@@ -127,19 +153,7 @@ const Catalog = () => {
                         <div className={classes.heroButtons}>
                             <Grid container spacing={2} justify="center">
                                 <Grid item>
-                                    {/* <div className={classes.search}>
-                                        <div className={classes.searchIcon}>
-                                            <SearchIcon />
-                                        </div>
-                                        <InputBase
-                                            placeholder="Search Collectibles…"
-                                            classes={{
-                                                root: classes.inputRoot,
-                                                input: classes.inputInput,
-                                            }}
-                                            inputProps={{ 'aria-label': 'search' }}
-                                        />
-                                    </div> */}
+                                    <Card>
                                     <SearchBar
                                         // value={this.state.value}
                                         // onChange={(newValue) => this.setState({ value: newValue })}
@@ -157,6 +171,7 @@ const Catalog = () => {
         </Select>
       </FormControl>
     </div>
+    </Card>
                                 </Grid>
                             </Grid>
                         </div>

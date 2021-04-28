@@ -20,7 +20,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import ListIcon from '@material-ui/icons/List';
 import HomeIcon from '@material-ui/icons/Home';
-
+import Image from '../img/appbar-title2.png';
 
 
 const drawerWidth = 240;
@@ -31,6 +31,7 @@ const useStyles = makeStyles((theme) => ({
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
+    backgroundColor: 'black',
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -88,6 +89,9 @@ const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
   },
+  logo: {
+    maxWidth: 600,
+  },
 }));
 
 
@@ -116,6 +120,7 @@ const AppHeader = () => {
         })}
       >
         <Toolbar>
+        
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -127,9 +132,8 @@ const AppHeader = () => {
           >
             <MenuIcon />
           </IconButton>
-          
+          <img src={Image} alt="logo" className={classes.logo} />
           <Typography variant="h3" className={classes.title}>
-            Collectibles
             </Typography>
 
           <Auth />

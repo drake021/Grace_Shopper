@@ -6,19 +6,33 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import { Link } from 'react-router-dom';
-// import Paper from '@material-ui/Paper';
-import Image from '../img/home-background.jpg';
+import Image from '../img/background2.jpg';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
 
 const useStyles = makeStyles((theme) => ({
+  "@global": {
+    main: {
+      backgroundImage: `url(${Image})`,
+      backgroundRepeat: "no-repeat",
+      backgroundPosition: "center center",
+      backgroundSize: "cover",
+      backgroundAttachment: "fixed",
+      height: "100%"
+    },
+  },
   icon: {
     marginRight: theme.spacing(2),
   },
   heroContent: {
-    backgroundColor: theme.palette.background.paper,
-    padding: theme.spacing(20, 0, 6),
+    padding: theme.spacing(40, 0, 35),
   },
   heroButtons: {
     marginTop: theme.spacing(4),
+  },
+  homeCard: {
+    minWidth: 600,
+
   },
 }));
 
@@ -31,18 +45,22 @@ const Home = () => {
       <CssBaseline />
       <main>
         {/* Hero unit */}
-        <div className={classes.heroContent}>
+        <div className={classes.heroContent} >
           <Container maxWidth="sm">
-            <Typography component="h3" variant="h2" align="center" color="textPrimary" gutterBottom>
-              Welcome to Alec and Calla's Collectibles!
+            <Card className={classes.homeCard} variant="outlined">
+              <CardContent>
+                <Typography component="h3" variant="h3" align="center" color="textPrimary" gutterBottom>
+                  Welcome to Superhero Collectibles!
             </Typography>
-            <Typography variant="h5" align="center" color="textSecondary" paragraph>
-              Come check out the premier collectibles site on the world wide web, hand picked by our team of experts.  Peruse our catalog and check out some of our featured products below!
+                <Typography variant="h5" align="center" color="textSecondary" paragraph>
+                  View our catalog of some of the rarest collectibes on the internet, that can only be found here.
             </Typography>
+              </CardContent>
+            </Card>
             <div className={classes.heroButtons}>
               <Grid container spacing={2} justify="center">
                 <Grid item>
-                  <Button variant="contained" color="primary" component={Link} to="/catalog">
+                  <Button variant="contained" component={Link} to="/catalog">
                     Collectible Catalog
                   </Button>
                 </Grid>

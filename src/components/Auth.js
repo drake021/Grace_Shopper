@@ -1,5 +1,16 @@
 import React, {useState} from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    '& > *': {
+      margin: theme.spacing(1),
+    },
+  },
+}));
+
+
 
 const Auth = ({ user, setUser, setMyRoutines }) => {
     //need to make it to where clicking register takes you to a /register route
@@ -11,7 +22,7 @@ const Auth = ({ user, setUser, setMyRoutines }) => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-
+    const classes = useStyles();
     //Functions
     const displayLogin = () => {
         setAuthDisplay('login');
@@ -92,7 +103,7 @@ const Auth = ({ user, setUser, setMyRoutines }) => {
 
         //login form
         if (authDisplay === 'login') {
-            return <div id='Auth'>
+            return <div className={classes.root}>
                 <div className='auth-row'>
                     <div>
                         Username:
@@ -106,10 +117,10 @@ const Auth = ({ user, setUser, setMyRoutines }) => {
                     <input type='password' onChange={passwordOnChange} />
                 </div>
                 <div className='auth-row'>
-                    <Button onClick={loginOnClick}>
+                    <Button onClick={loginOnClick} variant="contained">
                         Login
                     </Button>
-                    <Button onClick={displayBase}>
+                    <Button onClick={displayBase} variant="contained">
                         Cancel
                     </Button>
                 </div>
@@ -122,7 +133,7 @@ const Auth = ({ user, setUser, setMyRoutines }) => {
         }
         if (authDisplay === 'register') {
             //register form
-            return <div id='Auth'>
+            return <div className={classes.root}>
                 <div className='auth-row'>
                     <div>
                         Username:
@@ -142,10 +153,10 @@ const Auth = ({ user, setUser, setMyRoutines }) => {
                     <input type='password' onChange={confirmPasswordOnChange} />
                 </div>
                 <div className='auth-row'>
-                    <Button onClick={registerOnClick}>
+                    <Button onClick={registerOnClick} variant="contained">
                         Register
                     </Button>
-                    <Button onClick={displayBase}>
+                    <Button onClick={displayBase} variant="contained">
                         Cancel
                     </Button>
                 </div>
@@ -157,20 +168,20 @@ const Auth = ({ user, setUser, setMyRoutines }) => {
             </div>
         }
         //base form, user not logged in
-        return <div id='Auth'>
-            <Button onClick={displayRegister}>Register</Button>
-            <Button onClick={displayLogin}>Login</Button>
+        return <div className={classes.root}>
+            <Button onClick={displayRegister} variant="contained">Register</Button>
+            <Button onClick={displayLogin} variant="contained">Login</Button>
         </div>
     }
     //User is logged in
-    return <div id='Auth'>
+    return <div className={classes.root}>
         <div className='auth-row'>
         <div>
             {user.username} is logged in.
         </div>
         </div>
         <div className='auth-row'>
-            <Button onClick={logoutOnClick}>Logout</Button>
+            <Button onClick={logoutOnClick} variant="contained">Logout</Button>
         </div>
     </div>
 
