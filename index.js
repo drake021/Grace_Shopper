@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
 
 const { createUser, loginUser, getAllUsers, client, getUserByUsername, updateUser,
-    createOrder, updateOrder, createLineItem, deleteOrder, getItemCategoriesByItem,
+    createOrder, updateOrder, createLineItem, updateLineItem, deleteOrder, getItemCategoriesByItem,
     getCategoryById, createItem, getAllItems, getItemById, updateItem,
     removeItem, getLineItemsByOrder, removeLineItem,
     createCategory, getAllCategories, removeCategory, updateCategory, getItemCategoriesByCategory,
@@ -12,7 +12,7 @@ const { createUser, loginUser, getAllUsers, client, getUserByUsername, updateUse
 
 // create the express server here
 
-const PORT = 5000;
+const PORT = 3000;
 const express = require('express');
 const server = express();
 const cors = require('cors');

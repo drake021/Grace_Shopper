@@ -76,8 +76,8 @@ async function createTables() {
   console.log('creating lineItems..');
   await client.query(`CREATE TABLE "lineItems" (
     id SERIAL PRIMARY KEY,
-    "orderId" INT REFERENCES orders(id),
-    "itemId" INT REFERENCES items(id),
+    "orderId" INT,
+    "itemId" INT,
     ln INT,
     quantity INT,
     cost FLOAT(12),

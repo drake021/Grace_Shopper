@@ -26,7 +26,7 @@ const getLineItemsByOrder = async (id) => {
 
     try {
 
-        const { rows } = await client.query(`SELECT * FROM 'lineItems' 
+        const { rows } = await client.query(`SELECT * FROM "lineItems" 
         WHERE "orderId"=$1;`, [id]);
         testFirstRow(rows);
 
