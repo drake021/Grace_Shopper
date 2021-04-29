@@ -40,6 +40,39 @@ const getQueryValuesString = (objectsArray, id) => {
 
   return [dynamicArray, queryValuesString];
 };
+const insertQueryValuesString = (objectsArray, tableName) => {
+  /*
+  {
+    name, value, type
+  }
+  */
+  let dynamicArray = [];
+  let dynamicArrayNames = [];
+  let queryValuesString = `INSERT INTO  ${tableName}(`;
+  objectsArray.forEach(object => {
+    if (typeof (object.value) === object.type) {
+      dynamicArray.push(object.value);
+      dynamicArrayNames.push(object.name);
+    };
+  });
+  if (dynamicArray.length < 1) {
+    throw { name: 'error_noInputValues', message: 'missing input values for database' }
+  };
+  queryValuesString = queryValuesString + `${dynamicArrayNames[0]}`;
+  if (dynamicArray.length > 1) {
+    for (let i = 1; dynamicArray.length > i; i++) {
+      queryValuesString = queryValuesString + `, ${dynamicArrayNames[i]}`;
+    }
+  };
+  queryValuesString = queryValuesString + `) VALUES ($1`;
+  if (dynamicArray.length > 1) {
+    for (let i = 1; dynamicArray.length > i; i++) {
+      queryValuesString = queryValuesString + `, $${i + 1}`
+    };
+    queryValuesString = queryValuesString + `) RETURNING *;`;
+  }
+  return [dynamicArray, queryValuesString];
+};
 
 const deleteReferencedTable = async ({ topTable, bottomTable, referenceName, id }) => {
   const deletedBottomRows = await client.query(`DELETE FROM $1  
@@ -90,5 +123,6 @@ module.exports = {
   respError,
   getQueryValuesString,
   getNestedTable,
-  deleteReferencedTable
+  deleteReferencedTable,
+  insertQueryValuesString
 }
