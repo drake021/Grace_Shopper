@@ -1,5 +1,5 @@
-import {useRouter} from 'next/router'
-import Link from 'next/link'
+// import {useRouter} from 'next/router'
+// import Link from 'next/link'
 import {useState} from 'react'
 
 const Cart  = ({error,products})=>{
@@ -101,21 +101,21 @@ const Cart  = ({error,products})=>{
 
 
 
-    const res =  await fetch(`${baseUrl}/api/cart`,{
-        headers:{
-            "Authorization":token
-        }
-    })
-    const products =  await res.json()
-    if(products.error){
-        return{
-            props:{error:products.error}
-        }
-    }
-    console.log("products",products)
-    return {
-        props:{products}
-    }
+    // const res =  await fetch(`${baseUrl}/api/cart`,{
+    //     headers:{
+    //         "Authorization":token
+    //     }
+    // });
+    // const products =  await res.json()
+    // if(products.error){
+    //     return {
+    //         props:{error:products.error}
+    //     }
+    // }
+    // console.log("products",products)
+    // return {
+    //     props:{products}
+    // }
 
 
 
