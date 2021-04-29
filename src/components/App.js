@@ -19,11 +19,13 @@ import {
 
 const App = () => {
   const [message, setMessage] = useState('');
+  const [user, setUser] = useState(null);
+
 
 
 
   return <>
-    <AppHeader />
+    <AppHeader user={user} setUser={setUser}/>
     {/* <Nav /> */}
     <Switch>
     <Route path='/api/documents'>

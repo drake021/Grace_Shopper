@@ -1,6 +1,10 @@
 import React, {useState} from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
+import {fetchRegister} from '../api/index.js'
+// module.imports = {
+//     fetchRegister
+// };
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -12,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-const Auth = ({ user, setUser, setMyRoutines }) => {
+const Auth = ({ user, setUser }) => {
     //need to make it to where clicking register takes you to a /register route
     //OR make the element changed to have fields needed to register
 

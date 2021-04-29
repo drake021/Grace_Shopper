@@ -95,7 +95,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-const AppHeader = () => {
+const AppHeader = ({user, setUser}) => {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -136,7 +136,7 @@ const AppHeader = () => {
           <Typography variant="h3" className={classes.title}>
             </Typography>
 
-          <Auth />
+          <Auth user={user} setUser={setUser} />
           <ShoppingCartIcon />
         </Toolbar>
       </AppBar>

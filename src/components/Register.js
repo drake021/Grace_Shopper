@@ -1,3 +1,9 @@
+// import { fetchRegister } from'../api/index.js';
+// const { fetchRegister } = require('../api/index');
+// module.imports = {
+//   fetchRegister
+// };
+
 const Register = ({setUser, user}) => {
     
     const [username, setUsername] = useState('');

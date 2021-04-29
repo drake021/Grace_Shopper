@@ -85,6 +85,7 @@ const fetchMyOrders = async (user) => {
   return await resp.json();
 };
 
-export {
-    fetchCatalog
+module.exports = {
+    fetchCatalog,
+    fetchRegister
 };
