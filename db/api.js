@@ -58,15 +58,19 @@ const deleteReferencedTable = async ({ topTable, bottomTable, referenceName, id 
 // searches firstTableName where firstTableRefId == id; then uses readSecondTable with id of each row in fristTable.
 //uses secondKey to store the array of rows into the first table object; returns array of firstTableObjects
 const getNestedTable = async (firstTableName, firstTableRefId, secondTableKey, readSecondTable, id) => {
+  console.log('running getNestedTable...')
   let queryString;
   let valuesArray;
+  console.log(firstTableRefId, typeof(firstTableRefId));
+  console.log(id, typeof(id));
   if (typeof (firstTableRefId) !== 'string' || typeof (id) !== 'number') {
+    console.log('tableRef and/or id not found!!!');
     queryString = `SELECT * FROM ${firstTableName};`
     valuesArray = [firstTableName];
-    console.log("query, values", queryString, valuesArray);
   } else {
-    queryString = `SELECT * FROM $1 WHERE $2=($3);`
-    valuesArray = [firstTableName, firstTableRefId, id];
+    console.log(`selecting * from ${firstTableName} where ${firstTableRefId} == ${id}`);
+    queryString = `SELECT * FROM ${firstTableName} WHERE ${firstTableRefId}=(${id});`
+    valuesArray = [];
   };
 
   const { rows } = await client.query(queryString);
@@ -74,11 +78,17 @@ const getNestedTable = async (firstTableName, firstTableRefId, secondTableKey, r
 
   const myMapFunction = async (secondTableKey, readSecondTable) => {
     return async (firstTableRow) => {
-      const data = await readSecondTable(firstTableRow.id).rows;
-      const result = { ...firstTableRow, secondTableKey: data };
+      const data = await readSecondTable(firstTableRow.id);
+      const result = { ...firstTableRow };
+      if ( !data.rows ) {
+        result[secondTableKey] = [];  
+      } else {
+        result[secondTableKey] = data.rows;
+      };
       return result;
     }
-  }
+  };
+
   const mapFirstTable = await myMapFunction(secondTableKey, readSecondTable);
   const result = rows.map(mapFirstTable);
 

@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
 
 const { createUser, loginUser, getAllUsers, client, getUserByUsername, updateUser,
-    createOrder, updateOrder, createLineItem, deleteOrder, getItemCategoriesByItem,
+    createOrder, updateOrder, createLineItem, updateLineItem, deleteOrder, getItemCategoriesByItem,
     getCategoryById, createItem, getAllItems, getItemById, updateItem,
     removeItem, getLineItemsByOrder, removeLineItem,
     createCategory, getAllCategories, removeCategory, updateCategory, getItemCategoriesByCategory,
@@ -267,7 +267,7 @@ usersRouter.patch('/:userId', verifyToken, async (req, res, next) => {
 
 //POST api/orders (optional token)
 //creates a new Order; if token provided then assign creator id
-//pass in optional "lineItems" array to have line items added to new order.
+//pass in optional "lineItems" array to have line items added to new order. NOT IMPLEMENTED
 ordersRouter.post('', verifyToken, async (req, res, next) => {
     console.log('running POST api/orders ...')
     const { attn, email, phoneNumber, address, address2, zip, state, lineItems } = req.body;
@@ -427,39 +427,18 @@ itemsRouter.post('', verifyToken, async (req, res, next) => {
 
 //GET api/items (public)
 //returns array of all item objects
-//only returns cost if admin token is used
-
+//only returns cost if admin token is used -NOT IMPLEMENTED
 itemsRouter.get('', verifyToken, async (req, res, next) => {
     //includes categories
 
-    const attachCategories = (isAdmin = false) => {
-        if (!isAdmin) {
-            return async (item) => {
-                delete item.cost;
-                const itemCategories = await getItemCategoriesByItem(item.id);
-                const categories = itemCategories.map(async itemCategory => {
-                    return await getCategoryById(itemCategory.categoryId);
-                });
-                item.categories = categories;
-                return item;
-            }
-            return async (item) => {
-                const itemCategories = await getItemCategoriesByItem(item.id);
-                const categories = itemCategories.map(async itemCategory => {
-                    return await getCategoryById(itemCategory.categoryId);
-                });
-                item.categories = categories;
-                return item;
-            }
-        }
-    };
+    
 
     try {
 
-        const allItemsWithoutCategories = await getAllItems();
+        const allItems = await getAllItems();
         //Should work!
-        const allItemsWithCategories = allItemsWithoutCategories.map(attachCategories(req.user.admin));
-        res.send(allItemsWithCategories);
+        console.log('allItems: ', allItems);
+        res.send(allItems);
         next();
     }
     catch ({ name, message }) {
@@ -470,14 +449,13 @@ itemsRouter.get('', verifyToken, async (req, res, next) => {
 
 //GET api/items/:itemId (public command)
 //returns item object
-//only return cost if admin token is passed in
-
+//only return cost if admin token is passed in - NEEDS TO BE IMPLEMENTED
 itemsRouter.get('/:itemId', verifyToken, async (req, res, next) => {
 
     const { itemId } = req.params;
 
     try {
-        const item = await getItemById(itemId);
+        const item = await getItemById(Number(itemId));
         if (!req.user.admin) {
             delete item.cost
         };
@@ -493,7 +471,7 @@ itemsRouter.get('/:itemId', verifyToken, async (req, res, next) => {
 // PATCH api/items/:itemId (**admin**)
 //updates an item in the DB
 
-itemsRouter.patch('/:itemId', verifyToken, async (req, res, next) => {
+itemsRouter.patch('/:itemId', verifyToken, async (req, res, next) => {                       
 
     if (!req.user.admin) {
         throw {
@@ -504,13 +482,15 @@ itemsRouter.patch('/:itemId', verifyToken, async (req, res, next) => {
     };
     const itemId = Number(req.params.itemId);
     //edge case: NaN id passed through
-    if (typeof (itemId) !== 'number') {
+    if (typeof (itemId) !== 'number' || itemId === NaN) {
         respError('itemId_invalid', 'itemId is missing or invalid');
     };
+    const { name, description, cost, price, onHand } = req.body;
+    const id = itemId;
 
     try {
 
-        const updatedItem = await updateItem(itemId);
+        const updatedItem = await updateItem({ id, name, description, cost, price, onHand });
         res.send(updatedItem);
         next();
     }

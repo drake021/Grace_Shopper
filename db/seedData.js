@@ -4,7 +4,8 @@ const { client } = require('./client');
 // console.log('client is this in seedDate: ', client);
 const { 
   createUser,
-  updateUser
+  updateUser,
+  createItem
 } = require('./index');
 
 
@@ -75,8 +76,8 @@ async function createTables() {
   console.log('creating lineItems..');
   await client.query(`CREATE TABLE "lineItems" (
     id SERIAL PRIMARY KEY,
-    "orderId" INT REFERENCES orders(id),
-    "itemId" INT REFERENCES items(id),
+    "orderId" INT,
+    "itemId" INT,
     ln INT,
     quantity INT,
     cost FLOAT(12),
@@ -132,6 +133,27 @@ async function createInitialUsers() {
     throw error;
   }
 };
+async function createInitialItems() {
+  console.log('Starting to create items...');
+  try {
+
+    const itemsToCreate = [
+      { itemNumber: 'ITEM1', description: 'A item in the db', name: 'Item_1', cost: 1.23, price: 2.46 },
+      { itemNumber: 'ITEM2', description: 'A item in the db', name: 'Item_2', cost: 1.23, price: 2.46 },
+      { itemNumber: 'ITEM3', description: 'A item in the db', name: 'Item_3', cost: 1.23, price: 2.46 },
+      { itemNumber: 'ITEM4', description: 'A item in the db', name: 'Item_4', cost: 1.23, price: 2.46 },
+      { itemNumber: 'ITEM5', description: 'A item in the db', name: 'Item_5', cost: 1.23, price: 2.46 }
+    ]
+    const items = await Promise.all(itemsToCreate.map(createItem));
+
+    console.log('Items created:');
+    console.log(items);
+    console.log('Finished creating items!');
+  } catch (error) {
+    console.error('Error creating items!');
+    throw error;
+  }
+};
 
 
 async function rebuildDB() {
@@ -140,6 +162,7 @@ async function rebuildDB() {
     await dropTables();
     await createTables();
     await createInitialUsers();
+    await createInitialItems();
   } catch (error) {
     console.log('Error during rebuildDB')
     throw error;

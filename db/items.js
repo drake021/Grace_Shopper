@@ -27,15 +27,19 @@ const createItem = async ({ itemNumber, description, name, cost, price, onHand }
 const getItemById = async (id) => {
     try {
 
-        const draftItem = await getNestedTable('items', 'id', 'categories', getItemCategoriesByItem, id)[0];
-        draftItem.categories = draftItem.categories.map(async (categoryItem) => {
-            return await getCategoryById(categoryItem.categoryId);
-        });
+        const promisedDraftItem = await getNestedTable('items', 'id', 'categories', getItemCategoriesByItem, Number(id));
+        const draftItem = await Promise.all(promisedDraftItem);
+        console.log('draftItem: ', draftItem);
+        if (!!draftItem.categories) {
+            draftItem.categories = draftItem.categories.map(async (categoryItem) => {
+                return await getCategoryById(categoryItem.categoryId);
+            });
+        }
         return draftItem;
     }
 
     catch (error) {
-        console.error('error creating item..', error);
+        console.error('error getItemById..', error);
         throw error;
     }
 
@@ -61,13 +65,17 @@ const getItemByItemNumber = async (itemNumber) => {
 const getAllItems = async () => {
     try {
         const _ = null;
-        const draftItems = await getNestedTable('items', _, 'categories', getItemCategoriesByItem, _);
-        const result = draftItems.map(async draftItem => {
+        const promisedItems = await getNestedTable('items', _, 'categories', getItemCategoriesByItem, _);
+        const draftItems = await Promise.all(promisedItems);
+        console.log('draftItems: ', draftItems);
+        const promisedResult = draftItems.map(async draftItem => {
             draftItem.categories = draftItem.categories.map(async (categoryItem) => {
                 return await getCategoryById(categoryItem.categoryId);
             });
             return draftItem;
-        })
+        });
+        const result = await Promise.all(promisedResult);
+        console.log('final allItems: ', result);
         return result;
     }
 
