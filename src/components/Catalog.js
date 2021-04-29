@@ -81,6 +81,7 @@ import Select from '@material-ui/core/Select';
 import Image from '../img/background.gif';
 const randomImage = "https://source.unsplash.com/random";
 import { fetchCatalog } from '../api/index.js';
+import Cart from './Cart';
 
 
 
@@ -88,15 +89,15 @@ import { fetchCatalog } from '../api/index.js';
 
 const useStyles = makeStyles((theme) => ({
     "@global": {
-		main: {
-      backgroundImage: `url(${Image})`,
-			backgroundRepeat: "no-repeat",
-			backgroundPosition: "center center",
-			backgroundSize: "cover",
-			backgroundAttachment: "fixed",
-			height: "100%"
-		},
-  },
+        main: {
+            backgroundImage: `url(${Image})`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center center",
+            backgroundSize: "cover",
+            backgroundAttachment: "fixed",
+            height: "100%"
+        },
+    },
     icon: {
         marginRight: theme.spacing(2),
     },
@@ -124,18 +125,39 @@ const useStyles = makeStyles((theme) => ({
     formControl: {
         margin: theme.spacing(1),
         minWidth: 240,
-      },
+    },
 }));
 //a state, cards are the item objects in current category
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-const Catalog = ({ allItems, itemImages }) => {
+const Catalog = ({ allItems, itemImages, setCart, cart }) => {
     const classes = useStyles();
     const [catalogList, setCatalogList] = useState([]);
 
+    const createAddToCartClicker = async (itemNumber) => {
+        return async () => {
+            const newCartItem = {
+                qty: 1,
+                itemNumber,
+            }
+            setCart([...cart, { ...newCartItem }]);
+        };
+    };
+    const setupAddToCartClicker = (item) => {
+        const promisedAddToCartOnClick = createAddToCartClicker(item.itemNumber);
+        
+        console.log("addToCartOnClick", addToCartOnClick)
+
+        return <>
+            <Button size="small" color="primary" onClick={addToCartOnClick()}>
+                Add to Cart
+            </Button>
+        </>
+    };
+
     useEffect(() => {
         fetchCatalog().then(items => {
-            const newItems = items.map( item => {
+            const newItems = items.map(item => {
                 item.image = itemImages[item.itemNumber];
             });
             setCatalogList(items)
@@ -146,11 +168,11 @@ const Catalog = ({ allItems, itemImages }) => {
 
     console.log(catalogList);
 
-    const test = ( card ) => {
+    const test = (card) => {
         console.log('CARD: ', card);
         console.log('CARD.IMAGE: ', card.image);
         return <>
-        Pass
+            Pass
         </>
     }
 
@@ -166,24 +188,24 @@ const Catalog = ({ allItems, itemImages }) => {
                             <Grid container spacing={2} justify="center">
                                 <Grid item>
                                     <Card>
-                                    <SearchBar
+                                        <SearchBar
                                         // value={this.state.value}
                                         // onChange={(newValue) => this.setState({ value: newValue })}
                                         // onRequestSearch={() => doSomethingWith(this.state.value)}
-                                    />
-                                     <div>
-      <FormControl className={classes.formControl}>
-        <InputLabel htmlFor="grouped-native-select">Select a Category</InputLabel>
-        <Select native defaultValue="" id="grouped-native-select">
-          <option aria-label="None" value="" />
-            <option value={1}>Category 1</option>
-            <option value={2}>Category 2</option>
-            <option value={3}>Category 3</option>
-            <option value={4}>Cateogry 4</option>
-        </Select>
-      </FormControl>
-    </div>
-    </Card>
+                                        />
+                                        <div>
+                                            <FormControl className={classes.formControl}>
+                                                <InputLabel htmlFor="grouped-native-select">Select a Category</InputLabel>
+                                                <Select native defaultValue="" id="grouped-native-select">
+                                                    <option aria-label="None" value="" />
+                                                    <option value={1}>Category 1</option>
+                                                    <option value={2}>Category 2</option>
+                                                    <option value={3}>Category 3</option>
+                                                    <option value={4}>Cateogry 4</option>
+                                                </Select>
+                                            </FormControl>
+                                        </div>
+                                    </Card>
                                 </Grid>
                             </Grid>
                         </div>
@@ -205,15 +227,15 @@ const Catalog = ({ allItems, itemImages }) => {
                                     <CardContent className={classes.cardContent}>
                                         <Typography gutterBottom variant="h5" component="h2">
                                             {card.name}
-                    </Typography>
+                                        </Typography>
                                         <Typography>
                                             {card.description}
-                    </Typography>
+                                        </Typography>
                                     </CardContent>
                                     <CardActions>
-                                        <Button size="small" color="primary">
-                                            Add to Cart
-                    </Button>
+                                    <Button size="small" color="primary" >
+                Add to Cart
+            </Button>
                                     </CardActions>
                                 </Card>
                             </Grid>

@@ -26,6 +26,7 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [allItems, setAllItems] = useState(null);
   const [itemImages, setItemImages] = useState({ITEM1, ITEM2, ITEM3, ITEM4, ITEM5});
+  const [cart, setCart] = useState([]);
 
 
   useEffect(() => {
@@ -36,7 +37,11 @@ const App = () => {
       const localUser = JSON.parse(localStorage.getItem('user'));
       if (!!localUser) {
         setUser(localUser);
-      }
+      };
+      const localCart = JSON.parse(localStorage.getItem('cart'));
+      if (!!localCart) {
+        setCart(localCart);
+      };
       //checking for allItems in local storage; if not there fetching them from db
       const localStorageAllItems = JSON.parse(localStorage.getItem('allItems'));
       if (!!localStorageAllItems) {
@@ -77,7 +82,7 @@ const App = () => {
         <ViewProduct />
       </Route>
       <Route path='/catalog/category/:categoryId'>
-        <Catalog allItems={allItems} itemImages={itemImages} />
+        <Catalog allItems={allItems} itemImages={itemImages} cart={cart} setCart={setCart} />
       </Route>
       <Route path='/catalog'>
         <Redirect to="/catalog/category/featured" />
@@ -89,7 +94,7 @@ const App = () => {
         <Cart />
       </Route> */}
       <Route path='/checkout'>
-        <Checkout />
+        <Checkout user={user} cart={cart} />
       </Route>
       <Route path='/orders/:orderId'>
         <ViewOrder />

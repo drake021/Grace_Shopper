@@ -95,7 +95,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-const AppHeader = ({user, setUser}) => {
+const AppHeader = ({ user, setUser }) => {
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -120,7 +120,7 @@ const AppHeader = ({user, setUser}) => {
         })}
       >
         <Toolbar>
-        
+
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -134,10 +134,12 @@ const AppHeader = ({user, setUser}) => {
           </IconButton>
           <img src={Image} alt="logo" className={classes.logo} />
           <Typography variant="h3" className={classes.title}>
-            </Typography>
+          </Typography>
 
           <Auth user={user} setUser={setUser} />
-          <ShoppingCartIcon />
+          <Link to='/checkout' >
+            <ShoppingCartIcon />
+          </Link>
         </Toolbar>
       </AppBar>
       <Drawer
