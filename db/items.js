@@ -67,7 +67,6 @@ const getAllItems = async () => {
         const _ = null;
         const promisedItems = await getNestedTable('items', _, 'categories', getItemCategoriesByItem, _);
         const draftItems = await Promise.all(promisedItems);
-        console.log('draftItems: ', draftItems);
         const promisedResult = draftItems.map(async draftItem => {
             if (!!draftItem.categories) {
                 const promisedCategories = draftItem.categories.map(async (categoryItem) => {

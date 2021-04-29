@@ -79,6 +79,7 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Image from '../img/background.gif';
+const randomImage = "https://source.unsplash.com/random";
 import { fetchCatalog } from '../api/index.js';
 
 
@@ -125,15 +126,18 @@ const useStyles = makeStyles((theme) => ({
         minWidth: 240,
       },
 }));
-
+//a state, cards are the item objects in current category
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-const Catalog = () => {
+const Catalog = ({ allItems, itemImages }) => {
     const classes = useStyles();
     const [catalogList, setCatalogList] = useState([]);
 
     useEffect(() => {
         fetchCatalog().then(items => {
+            const newItems = items.map( item => {
+                item.image = itemImages[item.itemNumber];
+            });
             setCatalogList(items)
         })
             .catch(error => {
@@ -141,6 +145,14 @@ const Catalog = () => {
     }, []);
 
     console.log(catalogList);
+
+    const test = ( card ) => {
+        console.log('CARD: ', card);
+        console.log('CARD.IMAGE: ', card.image);
+        return <>
+        Pass
+        </>
+    }
 
     return (
         <React.Fragment>
@@ -180,20 +192,22 @@ const Catalog = () => {
                 <Container className={classes.cardGrid} maxWidth="md">
                     {/* End hero unit */}
                     <Grid container spacing={4}>
-                        {cards.map((card) => (
-                            <Grid item key={card} xs={12} sm={6} md={4}>
+                        {/* This is where we are mapping the items */}
+                        {catalogList.map((card) => (
+                            <Grid item key={card.id} xs={12} sm={6} md={4}>
                                 <Card className={classes.card}>
+                                    {test(card)}
                                     <CardMedia
                                         className={classes.cardMedia}
-                                        image="https://source.unsplash.com/random"
+                                        image={card.image}
                                         title="Image title"
                                     />
                                     <CardContent className={classes.cardContent}>
                                         <Typography gutterBottom variant="h5" component="h2">
-                                            Collectible
+                                            {card.name}
                     </Typography>
                                         <Typography>
-                                            This is where the description of the collectible will go.
+                                            {card.description}
                     </Typography>
                                     </CardContent>
                                     <CardActions>

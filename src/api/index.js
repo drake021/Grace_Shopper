@@ -1,4 +1,4 @@
-
+const BASE_URL = 'http://localhost:5000/api';
 //Register a user
 async function fetchRegister(username, password) {
   return await fetch(`/api/users/register`, {
@@ -43,31 +43,16 @@ async function fetchLogin(username, password) {
 }
 
 
-//return a user
-async function fetchMe(token) {
-  return await fetch(`/api/users/me`, {
-      method: "GET",
-      headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-      }
-  })
-      .then(response => response.json())
-      .then(result => {
-          return result;
-      })
-      .catch(console.error)
-}
-
 //Return everything in the catalog
 async function fetchCatalog() {
-  try {
-      const response = await fetch(`/api/items`)
-      const data = await response.json();
-      return data;
-  } catch (error) {
-      throw error;
-  }
+    try {
+        const allItemsJson = await fetch(`${BASE_URL}/items`);
+        const allItems = await allItemsJson.json();
+        localStorage.setItem('allItems', JSON.stringify(allItems));
+        return allItems;
+    } catch (error) {
+        throw error;
+    }
 
 }
 
@@ -85,7 +70,19 @@ const fetchMyOrders = async (user) => {
   return await resp.json();
 };
 
+const getAllItems = async () => {
+    try {
+        const allItemsJson = await fetch(`${BASE_URL}/items`);
+        const allItems = await allItemsJson.json();
+        localStorage.setItem('allItems', JSON.stringify(allItems));
+        return allItems;
+    } catch (error) {
+        throw error;
+    }
+};
+
 module.exports = {
     fetchCatalog,
-    fetchRegister
+    fetchRegister,
+    getAllItems
 };
