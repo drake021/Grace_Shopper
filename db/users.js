@@ -1,18 +1,69 @@
 
 const { client } = require("./client");
 const bcrypt = require('bcrypt');
-const { testFirstRow } = require("./api");
+const { testFirstRow, insertQueryValuesString } = require("./api");
 
-const createUser = async ({ username, password, email, firstName, lastName, phoneNumber, address, address2, zip, state }) => {
+const createUser = async ({ username, password, email, firstName, 
+    lastName, phoneNumber, address, address2, zip, state }) => {
 
     try {
         // const SALT_COUNT = 10;
-
-        const { rows } = await client.query(`INSERT INTO users(username, password, email, "firstName", "lastName", "phoneNumber", address, address2, zip, state)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-                ON CONFLICT (username) DO NOTHING 
-                RETURNING *;`, [username, password, email, firstName, lastName, phoneNumber, address, address2, zip, state]);
-                testFirstRow(rows);
+        const [valuesArray, queryString] = insertQueryValuesString(
+            [{
+                name: "username",
+                value: username,
+                type: "string"
+            },
+            {
+                name: "password",
+                value: password,
+                type: "string"
+            },
+            {
+                name: "email",
+                value: email,
+                type: "string"
+            },
+            {
+                name: '"firstName"',
+                value: firstName,
+                type: "string"
+            },
+            {
+                name: '"lastName"',
+                value: lastName,
+                type: "string"
+            },
+            {
+                name: '"phoneNumber"',
+                value: phoneNumber,
+                type: "string"
+            },
+            {
+                name: "address",
+                value: address,
+                type: "string"
+            },
+            {
+                name: "address2",
+                value: address2,
+                type: "string"
+            },
+            {
+                name: "zip",
+                value: zip,
+                type: "string"
+            },
+            {
+                name: "state",
+                value: state,
+                type: "string"
+            }],
+            "users"
+        );
+        const { rows } = await client.query(queryString, valuesArray);
+        testFirstRow(rows);
+        console.log('finished making user: ', rows);
         delete rows[0].password;
         return rows[0];
         //Would also like to do nothing on conflict with email; but haven't figured out how to work it.
@@ -29,7 +80,7 @@ const updateUser = async ({ id, admin, firstName, lastName, email, phoneNumber, 
     let dynamicArray = [];
     let dynamicArrayNames = [];
     const verifyValue = (value, type = 'string', name) => {
-        if (type === null) { type = 'string'};
+        if (type === null) { type = 'string' };
         if (typeof (value) === type) {
             dynamicArray.push(value);
             dynamicArrayNames.push(name);
@@ -116,7 +167,6 @@ const getUserByUsername = async (username) => {
         const { rows } = await client.query(`
             SELECT * FROM users
             WHERE username=$1;`, [username]);
-        testFirstRow(rows);
         // if (!rows[0]) {
         //     throw { name: "userNotExist", message: "Username does not exist" }
         // }

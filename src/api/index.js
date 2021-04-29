@@ -62,7 +62,7 @@ async function fetchMe(token) {
 //Return everything in the catalog
 async function fetchCatalog() {
   try {
-      const response = await fetch(`/api/catalog`)
+      const response = await fetch(`/api/items`)
       const data = await response.json();
       return data;
   } catch (error) {
@@ -85,3 +85,7 @@ const fetchMyOrders = async (user) => {
   return await resp.json();
 };
 
+module.exports = {
+    fetchCatalog,
+    fetchRegister
+};

@@ -12,7 +12,7 @@ const { createUser, loginUser, getAllUsers, client, getUserByUsername, updateUse
 
 // create the express server here
 
-const PORT = 3000;
+const PORT = 5000;
 const express = require('express');
 const server = express();
 const cors = require('cors');
@@ -945,11 +945,8 @@ module.exports = {
     server,
     apiRouter
 }
-<<<<<<< HEAD
-=======
 // *** Notes ***
 //make sure id and other number types are checked against NaN
 //floor integers
 //more error handling?
 //can write more helper functions for similar code to condense 
->>>>>>> 68f74dcf2f0704b5069d937729c36e732d35fa47
