@@ -69,11 +69,19 @@ const getAllItems = async () => {
         const draftItems = await Promise.all(promisedItems);
         console.log('draftItems: ', draftItems);
         const promisedResult = draftItems.map(async draftItem => {
-            draftItem.categories = draftItem.categories.map(async (categoryItem) => {
-                return await getCategoryById(categoryItem.categoryId);
-            });
+            if (!!draftItem.categories) {
+                const promisedCategories = draftItem.categories.map(async (categoryItem) => {
+                    console.log("categoryItem: ", categoryItem)
+                    return await getCategoryById(categoryItem.categoryId);
+                    
+                });
+                console.log('promisedCategories: ', promisedCategories);
+                draftItem.categories = await Promise.all(promisedCategories);
+            }
+            console.log('draftItem: ', draftItem);
             return draftItem;
         });
+        
         const result = await Promise.all(promisedResult);
         console.log('final allItems: ', result);
         return result;

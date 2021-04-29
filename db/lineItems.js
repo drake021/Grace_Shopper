@@ -27,9 +27,8 @@ const getLineItemsByOrder = async (id) => {
     try {
 
         const { rows } = await client.query(`SELECT * FROM "lineItems" 
-        WHERE "orderId"=$1;`, [id]);
-        testFirstRow(rows);
-
+        WHERE "orderId"=($1);`, [id]);
+        console.log("lines items of order: ", rows);
         return rows;
     }
 
@@ -42,34 +41,37 @@ const getLineItemsByOrder = async (id) => {
 const updateLineItem = async ({ id, quantity, cost, price, name, description }) => {
 
     try {
-        const [ valuesArray, queryValuesString] = getQueryValuesString({
-            name: "quantity",
-            value: quantity,
-            type: "number"
-        },
-        {
-            name: "cost",
-            value: cost,
-            type: "number"
-        },
-        {
-            name: "price",
-            value: price,
-            type: "number"
-        },
-        {
-            name: "name",
-            value: name,
-            type: "string"
-        },
-        {
-            name: "description",
-            value: description,
-            type: "string"
-        }
-        , id);
+        const [valuesArray, queryValuesString] = getQueryValuesString([
+            {
+                name: "quantity",
+                value: quantity,
+                type: "number"
+            },
+            {
+                name: "cost",
+                value: cost,
+                type: "number"
+            },
+            {
+                name: "price",
+                value: price,
+                type: "number"
+            },
+            {
+                name: "name",
+                value: name,
+                type: "string"
+            },
+            {
+                name: "description",
+                value: description,
+                type: "string"
+            }
+        ], id);
+        console.log('UPDATE "lineItems" ' + queryValuesString);
+        console.log(valuesArray);
         const { rows } = await client.query(`UPDATE "lineItems" 
-        ${queryValuesString}`, [valuesArray]);
+        ${queryValuesString}`);
         testFirstRow(rows);
 
         return rows[0];

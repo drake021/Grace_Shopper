@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
 
 const { createUser, loginUser, getAllUsers, client, getUserByUsername, updateUser,
-    createOrder, updateOrder, createLineItem, updateLineItem, deleteOrder, getItemCategoriesByItem,
+    createOrder, updateOrder, getAllOrders, createLineItem, updateLineItem, deleteOrder, getItemCategoriesByItem,
     getCategoryById, createItem, getAllItems, getItemById, updateItem,
     removeItem, getLineItemsByOrder, removeLineItem,
     createCategory, getAllCategories, removeCategory, updateCategory, getItemCategoriesByCategory,
@@ -85,9 +85,9 @@ const verifyToken = async (req, res, next) => {
         const token = auth.slice(prefix.length);
 
         try {
-
+            console.log('token jwt')
             const { id } = jwt.verify(token, JWT_SECRET);
-
+            console.log('token jwt pass')
             if (id) {
                 req.user = await getUserById(id);
                 console.log('user verified: ', req.user);
@@ -386,6 +386,27 @@ ordersRouter.delete('/:orderId', verifyToken, async (req, res, next) => {
 
 //GET api/orders
 //returns all orders
+ordersRouter.get('', verifyToken, async (req, res, next) => {
+
+    if (!req.user.admin) {
+        throw {
+            name: 'error_requireAdmin',
+            error: 'must use token of admin user',
+            message: 'must use token of admin user'
+        };
+    };
+    try {
+
+        const data = await getAllOrders();
+
+        res.send( data );
+        next();
+    }
+    catch ({ name, message }) {
+        next({ name, message })
+    }
+
+});
 
 //GET api/orders/:orderId
 //returns order by order id
@@ -437,7 +458,6 @@ itemsRouter.get('', verifyToken, async (req, res, next) => {
 
         const allItems = await getAllItems();
         //Should work!
-        console.log('allItems: ', allItems);
         res.send(allItems);
         next();
     }
@@ -751,7 +771,8 @@ categoriesRouter.patch('/:categoryId', verifyToken, async (req, res, next) => {
     const id = Math.floor(Number(req.params.categoryId));
     if (typeof (id) !== 'number' || id === NaN) {
         respError('invalid_categoryId', 'categoryId is missing or invalid')
-    }
+    };
+    const { name } = req.body;
 
     try {
 
@@ -836,6 +857,7 @@ itemCategoriesRouter.post('', verifyToken, async (req, res, next) => {
 
 //GET api/itemCategories/item/:itemId (public)
 //returns array of all itemCategories for item by item id
+//IMPROVE? maybe should return category objects instead of itemCategory objects
 
 itemCategoriesRouter.get('/:itemId', async (req, res, next) => {
 

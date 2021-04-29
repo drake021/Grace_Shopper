@@ -5,9 +5,9 @@ const createCategory = async (name) => {
 
     try {
 
-        const { rows } = await client.query(`INSERT INTO "routineActivities"(name, priority)
-                VALUES ($1, $2, $3, $4)
-                RETURNING *;`, [name, priority]);
+        const { rows } = await client.query(`INSERT INTO "categories"(name)
+                VALUES ($1)
+                RETURNING *;`, [name]);
         testFirstRow(rows);
 
         return rows[0];
@@ -39,7 +39,7 @@ const getAllCategories = async () => {
         const { rows } = await client.query(`SELECT * FROM categories;`);
         testFirstRow(rows);
 
-        return rows[0];
+        return rows;
     }
 
     catch (error) {
@@ -53,7 +53,7 @@ const updateCategory = async ({id, name}) => {
         if ( typeof(name) !== "string" ) {
             throw respError('missingName', 'need to input valid string for name');
         }
-        const { rows } = await client.query(`UPDATE categorioes 
+        const { rows } = await client.query(`UPDATE categories 
         SET name=$1 
         WHERE id=($2)
         RETURNING *;`, [name, id]);

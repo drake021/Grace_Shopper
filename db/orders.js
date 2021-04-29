@@ -1,65 +1,63 @@
 
 
 const { client } = require("./client");
-const { testFirstRow, getQueryValuesString, getNestedTable } = require("./api");
+const { testFirstRow, getQueryValuesString, getNestedTable, insertQueryValuesString } = require("./api");
 const { getLineItemsByOrder } = require("./lineItems");
 
 
 //creates order; line items attached seperately
-const createOrder = async ({ userId, attn, email, phoneNumber, address, address2, zip, state }) => {
+const createOrder = async ({ userId, attn, email, phoneNumber, 
+    address, address2, zip, state }) => {
     console.log('creating orders...');
-    console.log(userId, attn, email, phoneNumber, address, address2, zip, state);
-    let dynamicArray = [];
-    let dynamicArrayNames = [];
-    const verifyValue = (value, type = 'string', name) => {
-        if (type === null) { type='string' };
-        if (typeof (value) === type) {
-            dynamicArray.push(value);
-            dynamicArrayNames.push(name);
+    const [valuesArray, queryString] = insertQueryValuesString([
+        {
+            name: '"userId"',
+            value: userId,
+            type: 'string'
+        },
+        {
+            name: "attn",
+            value: attn,
+            type: 'string'
+        },
+        {
+            name: "email",
+            value: email,
+            type: 'string'
+        },
+        {
+            name: '"phoneNumber"',
+            value: phoneNumber,
+            type: 'string'
+        },
+        {
+            name: "address",
+            value: address,
+            type: 'string'
+        },
+        {
+            name: "address2",
+            value: address2,
+            type: 'string'
+        },
+        {
+            name: "zip",
+            value: zip,
+            type: 'string'
+        },
+        {
+            name: "state",
+            value: state,
+            type: 'string'
         }
-    };
-    const _ = null;
-    const getQueryValuesString = () => {
-        console.log('getting query string..');
-        let queryValuesString = `(`;
-        verifyValue(userId, 'number', '"userId"');
-        verifyValue(attn, _, 'attn');
-        verifyValue(email, _, 'email');
-        verifyValue(phoneNumber, _, '"phoneNumber"');
-        verifyValue(address, _, 'address');
-        verifyValue(address2, _, 'address2');
-        verifyValue(zip, _, 'zip');
-        verifyValue(state, _, 'state');
-        console.log(dynamicArray, dynamicArrayNames);
-        if (dynamicArray.length < 1) {
-            throw { name: 'error_noInputValues', message: 'missing input values for database' }
-        }
-        queryValuesString = queryValuesString + `${dynamicArrayNames[0]}`;
+    ], "orders");
 
-        if (dynamicArray.length > 1) {
-            for (let i = 1; dynamicArray.length > i; i++) {
-                queryValuesString = queryValuesString + `, ${dynamicArrayNames[i]}`;
-            }
-        }
-        queryValuesString = queryValuesString + ') VALUES ($1';
-        if (dynamicArray.length > 1) {
-            for (let i = 1; dynamicArray.length > i; i++) {
-                queryValuesString = queryValuesString + `, $${i + 1}`;
-            }
-        }
-        queryValuesString = queryValuesString + ') ';
-
-        return queryValuesString;
-    };
 
     try {
         //if there are no values passed in except token and id; this should error out as no values provided
-        const queryValuesString = getQueryValuesString();
+
         // console.log('queryString: ', queryValuesString);
-        const { rows } = await client.query(`
-        INSERT INTO orders
-        ${queryValuesString}
-        RETURNING *;`, dynamicArray);
+        const { rows } = await client.query(queryString, valuesArray);
         testFirstRow(rows);
         return rows[0];
         // returns user object of updated row (not password);
@@ -69,6 +67,23 @@ const createOrder = async ({ userId, attn, email, phoneNumber, address, address2
         throw error;
     }
     //returns new order object
+};
+
+const getAllOrders = async () => {
+    console.log('running getAllOrders..');
+
+    try {
+        const allOrders = await Promise.all( await getNestedTable("orders", null, "lineItems", getLineItemsByOrder, null));
+        // const lineItems = await getLineItemsByOrder(id).rows;
+        // testFirstRow(lineItems);
+        return allOrders;
+    }
+
+    catch (error) {
+        console.error('error getAllOrders..', error);
+        throw error;
+    }
+    //returns order object
 };
 
 //retrieves order row from DB, includes linesItems
@@ -174,14 +189,12 @@ const deleteOrder = async (id) => {
             DELETE FROM "lineItems"
             WHERE "orderId"=($1)
             RETURNING *;`, [id]);
-            console.log(lineItems);
         const fields = await client.query(`
             DELETE FROM orders
             WHERE "id"=($1)
             RETURNING *;`, [id]);
-            console.log(fields);
 
-        return [ fields, lineItems ];
+        return [fields, lineItems];
     }
 
     catch (error) {
@@ -196,5 +209,6 @@ module.exports = {
     getOrderById,
     getOrdersByUserId,
     updateOrder,
-    deleteOrder
+    deleteOrder,
+    getAllOrders
 }

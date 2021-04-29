@@ -206,7 +206,7 @@ const getAllUsers = async () => {
             SELECT * FROM users;`);
         testFirstRow(rows);
 
-        return rows[0];
+        return rows;
     }
 
     catch (error) {

@@ -5,8 +5,8 @@ const createItemCategory = async ({ itemId, categoryId }) => {
 
     try {
 
-        const { rows } = await client.query(`INSERT INTO "itemCategories"
-        ("itemId", "categoryId") RETURNING *;`, [itemId, categoryId]);
+        const { rows } = await client.query(`INSERT INTO "itemCategories"("itemId", "categoryId")
+        VALUES ($1, $2) RETURNING *;`, [itemId, categoryId]);
         testFirstRow(rows);
 
         return rows[0];
@@ -27,7 +27,7 @@ const getItemCategoriesByItem = async (itemId) => {
             return [];
         }
 
-        return rows[0];
+        return rows;
     }
 
     catch (error) {

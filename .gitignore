@@ -4,5 +4,3 @@ node_modules/
 .vscode
 .idea
 .env
-src/img
-node_modules
