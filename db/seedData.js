@@ -142,11 +142,18 @@ async function createInitialItems() {
   try {
 
     const itemsToCreate = [
-      { itemNumber: 'ITEM1', description: 'A item in the db', name: 'Item_1', cost: 1.23, price: 2.46 },
-      { itemNumber: 'ITEM2', description: 'A item in the db', name: 'Item_2', cost: 1.23, price: 2.46 },
-      { itemNumber: 'ITEM3', description: 'A item in the db', name: 'Item_3', cost: 1.23, price: 2.46 },
-      { itemNumber: 'ITEM4', description: 'A item in the db', name: 'Item_4', cost: 1.23, price: 2.46 },
-      { itemNumber: 'ITEM5', description: 'A item in the db', name: 'Item_5', cost: 1.23, price: 2.46 }
+      { itemNumber: 'ITEM1', description: 'Soaring through the skies above a swirling cloud base, the Power Girl Premium Format Figure measures 25” tall. She poses powerfully here, flexing her muscles in a moment of calm between battles.', name: 'Power Girl, cost: 1.23, price: 350 },
+      { itemNumber: 'ITEM2', description: 'Going back to the origins of our favorite superheroes, Hot Toys is bringing The Origins Collection which takes inspiration from the pages of classic Marvel Comics', name: 'Iron Man', cost: 1.23, price: 247 },
+      { itemNumber: 'ITEM3', description: 'Famous for his superhuman strength and indestructible shield, Steve Rogers finds himself called into action to complete a mission with the universe’s entire existence on the line.', name: 'Captain America', cost: 1.23, price: 320 },
+      { itemNumber: 'ITEM4', description: 'The Superman: The Movie Figure measures 20.5” tall, lovingly crafted in the iconic likeness of actor Christopher Reeve as Superman. His portrait features stunning blue eyes, and the signature kiss curl in his hair.', name: 'Superman', cost: 1.23, price: 417 },
+      { itemNumber: 'ITEM5', description: 'The Batmobile is on its way to fight crime in Gotham City! As one of the iconic bat gadgets, the technologically advanced Batmobile is a heavily armored tactical assault vehicle in Batman’s arsenal.', name: 'Batmobile', cost: 1.23, price: 532 },
+      { itemNumber: 'ITEM6', description: 'The Galactus Maquette stands 26” tall, towering over an annihilated city landscape where buildings melt beneath his boots as he wields the fiery force of the Power Cosmic.', name: 'Galactus', cost: 1.23, price: 180 },
+      { itemNumber: 'ITEM7', description: 'The war between Avengers and villainous Thanos is here in Avengers: Infinity War. Superheroes will join forces to fight Thanos, while the fate of the Earth and the Universe lays in the balance!', name: 'Thor', cost: 1.23, price: 360 },
+      { itemNumber: 'ITEM8', description: 'In Spider-Man: Far From Home, Peter Parker plans to leave super heroics behind for a few weeks with his friends for a vacation in Europe, but several creature attacks are plaguing the continent.', name: 'Spider-Man', cost: 1.23, price: 140 },
+      { itemNumber: 'ITEM9', description: 'Vision is aware of the full trauma Wanda experienced in Avengers: Infinity War, having killed him to prevent Thanos from getting the Mind Stone, but heartbroken to watch him sacrificed again after the warlord revised time.', name: 'Vision', cost: 1.23, price: 370 },
+      { itemNumber: 'ITEM10', description: 'Commemorating Stan Lee memorable cameo appearance in Thor: Ragnarok, Sideshow and Hot Toys present a highly-detailed sixth scale Stan Lee® collectible figure as one of the 2020 Toy Fair Exclusive items only available in selected markets!', name: 'Stan Lee', cost: 1.23, price: 420 },
+      { itemNumber: 'ITEM11', description: 'You’ve heard of a derby jammer- now get ready for a derby HAMMER! The Harley Quinn Figure measures 20” tall as Gotham’s maid of mischief skates her way around a neon-themed rink base, ready to take a swing at any chuckleheads who get in her way.', name: 'Harley Quinn', cost: 1.23, price: 320 },
+      { itemNumber: 'ITEM12', description: 'A item in the dbInspired by her classic appearance in Marvel Comics, the polyresin Scarlet Witch Premium Format Figure features a fully sculpted red and pink bodysuit, complete with red boots and gloves exuding chaos magic tendrils.', name: 'Scarlet Witch', cost: 1.23, price: 340 },
     ]
     const items = await Promise.all(itemsToCreate.map(createItem));
 
@@ -168,7 +175,7 @@ async function createInitialItems() {
       { itemNumber: 'ITEM2', description: 'an item, yay', name: 'my item', cost: 1.00, price: 2.00, onHand: 5 },
       { itemNumber: 'ITEM3', description: 'an item, yay', name: 'my item', cost: 1.00, price: 2.00, onHand: 5 },
       { itemNumber: 'ITEM4', description: 'an item, yay', name: 'my item', cost: 1.00, price: 2.00, onHand: 5 },
-      { itemNumber: 'ITEM5', description: 'an item, yay', name: 'my item', cost: 1.00, price: 2.00, onHand: 5 }
+      { itemNumber: 'ITEM5', description: 'an item, yay', name: 'my item', cost: 1.00, price: 2.00, onHand: 5 },
     ]
     const items = await Promise.all(itemsToCreate.map(createItem));
 

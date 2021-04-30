@@ -15,17 +15,24 @@ import {
   ApiDocuments
 } from '.'
 import { getAllItems } from '../api/index.js';
-import ITEM1 from '../img/ITEM1.jpg';
-import ITEM2 from '../img/ITEM2.jpg';
-import ITEM3 from '../img/ITEM3.jpg';
-import ITEM5 from '../img/ITEM5.jpg';
-import ITEM4 from '../img/ITEM4.jpg';
+import ITEM1 from '../img/item1.png';
+import ITEM2 from '../img/item2.png';
+import ITEM3 from '../img/item3.png';
+import ITEM4 from '../img/item4.png';
+import ITEM5 from '../img/item5.png';
+import ITEM6 from '../img/item6.png';
+import ITEM7 from '../img/item7.png';
+import ITEM8 from '../img/item8.png';
+import ITEM9 from '../img/item9.png';
+import ITEM10 from '../img/item10.png';
+import ITEM11 from '../img/item11.png';
+import ITEM12 from '../img/item12.png';
 
 const App = () => {
   const [message, setMessage] = useState('');
   const [user, setUser] = useState(null);
   const [allItems, setAllItems] = useState(null);
-  const [itemImages, setItemImages] = useState({ITEM1, ITEM2, ITEM3, ITEM4, ITEM5});
+  const [itemImages, setItemImages] = useState({ITEM1, ITEM2, ITEM3, ITEM4, ITEM5, ITEM6, ITEM7, ITEM8, ITEM9, ITEM10, ITEM11, ITEM12});
   const [cart, setCart] = useState([]);
 
 

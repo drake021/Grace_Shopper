@@ -1,63 +1,3 @@
-// import React, { useEffect, useState } from 'react';
-
-// const Catalog = () => {
-//     const [catalogList, setCatalogList] = useState([]);
-//     const [active, setActive] = useState(0);
-
-//     const eventHandler = (e, index) => {
-//         e.preventDefault();
-//         setActive(index);
-//     }
-
-//     const indexCount = (index) => {
-//         indexPlus = index + 1;
-//         return indexPlus;
-//     }
-
-
-//     useEffect(() => {
-//         fetchCatalog().then(items => {
-//             setCatalogList(items)
-//         })
-//             .catch(error => {
-//             });
-//     }, []);
-
-//     return (
-
-//         <div id="cataloglist">
-//             <form>
-//                 {catalogList.map(({ id, name, description, price }) => (
-//                     <div key={id}>
-//                         <h3 >
-//                             <button
-//                                 onClick={(e) => eventHandler(e, index)}
-//                                 className={active === index ? 'active' : 'inactive'}
-//                                 aria-expanded={active === index ? 'true' : 'false'}
-//                                 aria-controls={'sect-' + indexCount(index)}
-//                                 aria-disabled={active === index ? 'true' : 'false'}
-//                                 tabIndex={indexCount(index)}
-//                             >
-//                                 <span className="title-wrapper">{name}
-//                                     <span className={ active === index  ? 'plus' : 'minus'}></span>
-//                                 </span>  
-//                             </button>
-//                         </h3 >
-//                         <div id={ 'sect-' + indexCount(index) } className={ active === index  ? 'panel-open' : 'panel-close' }>
-//                                 { description }
-//                                 <h5>Price: {price} </h5>
-//                                 <button>Add to Cart</button>
-//                         </div>
-//                     </div>
-//                 ))}
-//             </form>
-//         </div>
-//     );
-
-// }
-
-// export default Catalog;
-
 import React, { useEffect, useState } from 'react';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
@@ -118,6 +58,7 @@ const useStyles = makeStyles((theme) => ({
     },
     cardMedia: {
         paddingTop: '56.25%', // 16:9
+        minHeight: 600,
     },
     cardContent: {
         flexGrow: 1,
@@ -172,7 +113,6 @@ const Catalog = ({ allItems, itemImages, setCart, cart }) => {
         console.log('CARD: ', card);
         console.log('CARD.IMAGE: ', card.image);
         return <>
-            Pass
         </>
     }
 
@@ -189,19 +129,16 @@ const Catalog = ({ allItems, itemImages, setCart, cart }) => {
                                 <Grid item>
                                     <Card>
                                         <SearchBar
-                                        // value={this.state.value}
-                                        // onChange={(newValue) => this.setState({ value: newValue })}
-                                        // onRequestSearch={() => doSomethingWith(this.state.value)}
                                         />
                                         <div>
                                             <FormControl className={classes.formControl}>
                                                 <InputLabel htmlFor="grouped-native-select">Select a Category</InputLabel>
                                                 <Select native defaultValue="" id="grouped-native-select">
                                                     <option aria-label="None" value="" />
-                                                    <option value={1}>Category 1</option>
-                                                    <option value={2}>Category 2</option>
-                                                    <option value={3}>Category 3</option>
-                                                    <option value={4}>Cateogry 4</option>
+                                                    <option value={1}>DC</option>
+                                                    <option value={2}>Marvel</option>
+                                                    <option value={3}>Iron Studios</option>
+                                                    <option value={4}>Hot Toys</option>
                                                 </Select>
                                             </FormControl>
                                         </div>
@@ -230,6 +167,9 @@ const Catalog = ({ allItems, itemImages, setCart, cart }) => {
                                         </Typography>
                                         <Typography>
                                             {card.description}
+                                        </Typography>
+                                        <Typography variant="h4" component="h6">
+                                            ${card.price}
                                         </Typography>
                                     </CardContent>
                                     <CardActions>

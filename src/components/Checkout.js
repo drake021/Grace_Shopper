@@ -13,13 +13,15 @@ import Typography from '@material-ui/core/Typography';
 import AddressForm from './AddressForm';
 import PaymentForm from './PaymentForm';
 import Review from './Review';
+import Image from '../img/superhero-checkoutbg.jpg';
+
 
 function Copyright() {
   return (
-    <Typography variant="body2" color="textSecondary" align="center">
+    <Typography variant="body2" color="secondary" align="center">
       {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
+      <Link color="inherit" href="">
+        Superhero Collectibles
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -28,6 +30,16 @@ function Copyright() {
 }
 
 const useStyles = makeStyles((theme) => ({
+  "@global": {
+    body: {
+        backgroundImage: `url(${Image})`,
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center center",
+        backgroundSize: "cover",
+        backgroundAttachment: "fixed",
+        height: "100%"
+    },
+},
   appBar: {
     position: 'relative',
   },
@@ -93,6 +105,7 @@ export default function Checkout( { user, cart } ) {
 
   return (
     <React.Fragment>
+      <body>
       <CssBaseline />
       <AppBar position="absolute" color="default" className={classes.appBar}>
         <Toolbar>
@@ -148,6 +161,7 @@ export default function Checkout( { user, cart } ) {
         </Paper>
         <Copyright />
       </main>
+      </body>
     </React.Fragment>
   );
 }
